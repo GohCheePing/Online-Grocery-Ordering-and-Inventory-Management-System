@@ -2,406 +2,359 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FreshMart - Customer Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshMart - Online Grocery System</title>
+
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial;
+:root{
+    /* 配色方案：清新绿 + 阳光金 */
+    --main: #27ae60;    /* 主色调：绿色 */
+    --hover: #1e8449;   /* 悬停深绿 */
+    --accent: #f1c40f;  /* 点缀金 */
+    --bg: #f8f9fa;      /* 背景浅灰 */
+    --dark: #2c3e50;    /* 文字深蓝灰 */
 }
 
-body{
-  background:#f5f7fa;
+*{margin:0;padding:0;box-sizing:border-box;font-family: 'Segoe UI', Arial, sans-serif;}
+
+body{background:var(--bg); color: var(--dark); overflow-x: hidden;}
+
+/* TOP BAR */
+.topbar{
+    background: white;
+    padding: 8px 50px;
+    display: flex;
+    justify-content: flex-end;
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
 }
 
-/* NAVBAR */
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 30px;
-  background:#2c7a4b;
-  color:white;
-  position:sticky;
-  top:0;
-  z-index:100;
-  flex-wrap:wrap;
+.topbar a{
+    color: #666;
+    margin-left: 15px;
+    text-decoration: none;
 }
 
-.logo{
-  font-size:24px;
-  font-weight:bold;
+.topbar a:hover{ color: var(--main); }
+
+/* HEADER */
+.header{
+    background: white;
+    padding: 15px 50px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-nav{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
+.logo img{
+    height: 55px; /* 使用本地 images/logo.jpg */
 }
 
-nav a{
-  color:white;
-  text-decoration:none;
-  margin-left:15px;
-  transition:0.3s;
+/* SEARCH */
+.search{
+    flex:1;
+    display:flex;
+    border: 2px solid var(--main);
+    border-radius: 6px;
+    overflow: hidden;
 }
 
-nav a:hover{
-  color:#ffd166;
+.search input{
+    flex:1;
+    padding: 10px 15px;
+    border:none;
+    outline:none;
+    font-size: 14px;
 }
 
-/* SEARCH BAR */
-#search-bar{
-  padding:5px 10px;
-  border-radius:5px;
-  border:none;
-  margin-left:15px;
-  transition:0.3s;
+.search button{
+    background: var(--main);
+    color:white;
+    border:none;
+    padding:0 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
 }
 
-#search-bar:focus{
-  outline:none;
-  box-shadow:0 0 8px #ffd166;
-  transform:scale(1.02);
-}
+.search button:hover{ background: var(--hover); }
 
 /* CART ICON */
 .cart{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#ffb703;
-  padding:15px;
-  border-radius:50%;
-  font-size:22px;
-  cursor:pointer;
-  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    color: var(--main);
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.cart span{
-  background:red;
-  color:white;
-  font-size:12px;
-  padding:2px 6px;
-  border-radius:50%;
-  position:absolute;
-  top:-5px;
-  right:-5px;
-}
-
-/* SLIDER */
-.slider{
-  width:100%;
-  height:50vh;
-  overflow:hidden;
-  position:relative;
-}
-
-.slide{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background-size:cover;
-  background-position:center;
-  opacity:0;
-  transition:1s;
-}
-
-.slide.active{
-  opacity:1;
-}
-
-.slide-text{
-  position:absolute;
-  bottom:30px;
-  left:30px;
-  color:white;
-  font-size:28px;
-  font-weight:bold;
-  background:rgba(0,0,0,0.4);
-  padding:8px 15px;
-  border-radius:5px;
-  opacity:0;
-  transform:translateY(20px);
-  transition:all 0.8s ease-out;
-}
-
-.slide.active .slide-text{
-  opacity:1;
-  transform:translateY(0);
-}
-
-/* CATEGORY */
+/* CATEGORY BAR */
 .categories{
-  padding:40px 20px;
-  text-align:center;
+    display:flex;
+    justify-content: center;
+    gap: 50px;
+    background: var(--main);
+    padding: 12px;
 }
 
-.category-box{
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-top:20px;
+.cat{
+    text-align:center;
+    cursor:pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    color: white;
+    font-weight: 500;
 }
 
-.category{
-  background:white;
-  padding:15px 20px;
-  min-width:120px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  transition:0.3s;
-  font-size:18px;
-  cursor:pointer;
+.cat:hover{ color: var(--accent); transform: translateY(-2px); }
+
+/* BANNER */
+.banner{
+    height: 180px;
+    background: linear-gradient(135deg, var(--main), var(--hover));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
 }
 
-.category:hover, .category.active{
-  transform:translateY(-5px);
-  background:#ffd166;
-  color:#2c7a4b;
+/* PRODUCTS SECTION */
+.products{ padding: 30px 50px; }
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap: 25px;
 }
 
-/* PRODUCTS */
-.products{
-  padding:40px 20px;
-  background:white;
-  text-align:center;
+.card{
+    background:white;
+    padding:15px;
+    text-align:center;
+    border-radius: 12px;
+    transition: 0.3s;
+    border: 1px solid #eee;
 }
 
-.product-container{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-  margin-top:20px;
+.card:hover{
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-color: var(--main);
 }
 
-.product{
-  width:180px;
-  background:white;
-  border-radius:10px;
-  padding:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  transition:transform 0.3s, opacity 0.6s ease-out, box-shadow 0.3s;
-  opacity:0;
-  transform:translateY(50px);
+.card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    border-radius: 8px;
 }
 
-.product.show{
-  opacity:1;
-  transform:translateY(0);
+.card h4{ margin-top: 12px; font-size: 16px; }
+
+.price{
+    color: var(--main);
+    font-weight: bold;
+    font-size: 20px;
+    margin: 8px 0;
 }
 
-.product:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+.stock-tag{
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
 }
 
-.product img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-  border-radius:5px;
+.card button{
+    background: var(--main);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    transition: 0.3s;
 }
 
-.product button{
-  margin-top:10px;
-  padding:6px 12px;
-  background:#2c7a4b;
-  border:none;
-  color:white;
-  border-radius:5px;
-  cursor:pointer;
-  transition:transform 0.2s, background 0.3s;
+.card button:hover{ background: var(--hover); }
+.card button:disabled{ background: #bdc3c7; cursor: not-allowed; }
+
+/* CART SIDE PANEL */
+.cart-panel{
+    position:fixed;
+    right: -350px;
+    top:0;
+    width:320px;
+    height:100%;
+    background:white;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    padding:25px;
+    transition: 0.4s;
+    z-index: 2000;
 }
 
-.product button:hover{
-  background:#1b4d2e;
-  transform:scale(1.05);
+.cart-panel.active{ right: 0; }
+
+.cart-header{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--main);
+    padding-bottom: 10px;
 }
 
-/* PROMO */
-.promo{
-  background:#ffb703;
-  padding:30px 15px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
+.cart-item{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
 }
 
-/* FOOTER */
-footer{
-  background:#333;
-  color:white;
-  text-align:center;
-  padding:20px 10px;
+.btn-checkout{
+    background: var(--main);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-/* MOBILE RESPONSIVE */
-@media(max-width:768px){
-  header{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-  nav{
-    margin-top:10px;
-  }
-  .product-container{
-    justify-content:center;
-  }
-  .product{
-    width:45%;
-  }
-}
-@media(max-width:480px){
-  .product{
-    width:90%;
-  }
-}
+.btn-checkout:hover{ background: var(--hover); }
+
 </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">FreshMart</div>
-  <nav>
-    <a href="#">Home</a>
-    <a href="#">Shop</a>
-    <input type="text" id="search-bar" placeholder="🔎 Search products">
-    <a href="cart.html">🛒 Cart <span id="cart-count">0</span></a>
-  </nav>
-</header>
-
-<!-- SLIDER -->
-<div class="slider">
-  <div class="slide active" style="background-image:url('https://images.unsplash.com/photo-1542838132-92c53300491e');">
-    <div class="slide-text">Fresh Vegetables Everyday</div>
-  </div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1610832958506-aa56368176cf');">
-    <div class="slide-text">Daily Fresh Dairy Products</div>
-  </div>
-  <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1506617420156-8e4536971650');">
-    <div class="slide-text">Healthy Fruits For You</div>
-  </div>
+<div class="topbar">
+    <a href="#">Admin Dashboard</a>
+    <a href="#">My Orders</a>
+    <a href="#">Login</a>
+    <a href="#">Register</a>
 </div>
 
-<!-- CATEGORY -->
-<section class="categories">
-  <h2>Shop by Category</h2>
-  <div class="category-box">
-    <div class="category active" data-cat="all">All</div>
-    <div class="category" data-cat="vegetable">🥦 Vegetables</div>
-    <div class="category" data-cat="fruit">🍎 Fruits</div>
-    <div class="category" data-cat="dairy">🥛 Dairy</div>
-    <div class="category" data-cat="bakery">🍞 Bakery</div>
-  </div>
-</section>
+<div class="header">
+    <div class="logo">
+        <img src="images/logo.jpg" alt="Logo">
+    </div>
 
-<!-- PRODUCTS -->
-<section class="products">
-  <h2>Featured Products</h2>
-  <div class="product-container">
-    <div class="product" data-cat="fruit" data-name="apple">
-      <img src="https://images.unsplash.com/photo-1567306226416-28f0efdc88ce">
-      <h4>Apple</h4>
-      <p>$3.50</p>
-      <button onclick="addCart()">Add to Cart</button>
+    <div class="search">
+        <input type="text" placeholder="Search for fresh groceries..." onkeyup="search(this.value)">
+        <button>Search</button>
     </div>
-    <div class="product" data-cat="vegetable" data-name="tomato">
-      <img src="https://images.unsplash.com/photo-1582515073490-dc7a9d1b7c59">
-      <h4>Tomato</h4>
-      <p>$2.20</p>
-      <button onclick="addCart()">Add to Cart</button>
-    </div>
-    <div class="product" data-cat="dairy" data-name="milk">
-      <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf">
-      <h4>Milk</h4>
-      <p>$2.80</p>
-      <button onclick="addCart()">Add to Cart</button>
-    </div>
-    <div class="product" data-cat="bakery" data-name="bread">
-      <img src="https://images.unsplash.com/photo-1603033065009-c7b8f00bfa36">
-      <h4>Bread</h4>
-      <p>$1.80</p>
-      <button onclick="addCart()">Add to Cart</button>
-    </div>
-  </div>
-</section>
 
-<div class="promo">
-🔥 Free Delivery for Orders Above $30
+    <div class="cart" onclick="toggleCart()">
+        <span>🛒</span> My Cart (<span id="count">0</span>)
+    </div>
 </div>
 
-<footer>
-  <p>FreshMart Online Grocery Ordering System</p>
-  <p>support@freshmart.com</p>
-</footer>
+<div class="categories">
+    <div class="cat" onclick="filter('all')">🏢 ALL</div>
+    <div class="cat" onclick="filter('fruit')">🍎 FRUITS</div>
+    <div class="cat" onclick="filter('veg')">🥬 VEGETABLES</div>
+    <div class="cat" onclick="filter('dairy')">🥛 DAIRY</div>
+</div>
+
+<div class="banner">
+    <h1>FRESHMART</h1>
+    <p>Premium Quality Groceries Delivered Fast</p>
+</div>
+
+<div class="products">
+    <h2 style="margin-bottom: 25px; color: var(--dark);">Featured Products</h2>
+    <div class="grid" id="grid"></div>
+</div>
+
+<div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+        <h3>Shopping Cart</h3>
+        <button onclick="toggleCart()" style="border:none; background:none; cursor:pointer; font-size: 18px;">✕</button>
+    </div>
+    <div id="items" style="max-height: 60vh; overflow-y: auto;"></div>
+    <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
+        <h4 style="font-size: 18px;">Total: <span style="color:var(--main); float:right;">RM <span id="total">0.00</span></span></h4>
+        <button class="btn-checkout" onclick="alert('Proceeding to Checkout...')">Checkout Now</button>
+    </div>
+</div>
 
 <script>
-/* CART COUNTER */
-let count=0;
-function addCart(){
-  count++;
-  document.getElementById("cart-count").innerText=count;
-  // 按钮点击动画
-  event.target.style.transform="scale(0.95)";
-  setTimeout(()=>{event.target.style.transform="scale(1)";},150);
-}
+// 产品数据，包含本地图片和初始库存
+const products=[
+    {id:1, name:"Red Apple", price:3.50, cat:"fruit", img:"images/apple.jpg", stock: 10},
+    {id:2, name:"Tomato", price:2.20, cat:"veg", img:"images/tomato.jpg", stock: 15},
+    {id:3, name:"Fresh Milk", price:8.80, cat:"dairy", img:"images/milk.jpg", stock: 5},
+    {id:4, name:"Wholemeal Bread", price:4.20, cat:"dairy", img:"images/bread.jpg", stock: 8}
+];
 
-/* SLIDER */
-let slides=document.querySelectorAll(".slide");
-let index=0;
-function showSlide(){
-  slides[index].classList.remove("active");
-  index=(index+1)%slides.length;
-  slides[index].classList.add("active");
-}
-setInterval(showSlide,4000);
+let cart=[];
 
-/* SCROLL REVEAL */
-let products=document.querySelectorAll(".product");
-function reveal(){
-  products.forEach(p=>{
-    let pos=p.getBoundingClientRect().top;
-    if(pos<window.innerHeight-50){
-      p.classList.add("show");
-    }
-  });
-}
-window.addEventListener("scroll",reveal);
-window.addEventListener("load",reveal);
-
-/* SEARCH FUNCTION */
-document.getElementById("search-bar").addEventListener("input",function(){
-  let val=this.value.toLowerCase();
-  products.forEach(p=>{
-    let name=p.dataset.name.toLowerCase();
-    if(name.includes(val)){
-      p.style.display="block";
-    } else{
-      p.style.display="none";
-    }
-  });
-});
-
-/* CATEGORY FILTER */
-let categories=document.querySelectorAll(".category");
-categories.forEach(cat=>{
-  cat.addEventListener("click",()=>{
-    categories.forEach(c=>c.classList.remove("active"));
-    cat.classList.add("active");
-    let type=cat.dataset.cat;
-    products.forEach(p=>{
-      if(type=="all" || p.dataset.cat==type){
-        p.style.display="block";
-      } else{
-        p.style.display="none";
-      }
+function show(list){
+    let html="";
+    list.forEach(p=>{
+        const isOut = p.stock <= 0;
+        html+=`
+        <div class="card">
+            <img src="${p.img}">
+            <h4>${p.name}</h4>
+            <p class="price">RM ${p.price.toFixed(2)}</p>
+            <p class="stock-tag">In Stock: ${p.stock}</p>
+            <button ${isOut ? 'disabled' : ''} onclick="add(${p.id})">
+                ${isOut ? 'Out of Stock' : 'Add to Cart'}
+            </button>
+        </div>`;
     });
-  });
-});
+    document.getElementById("grid").innerHTML=html;
+}
+show(products);
+
+function filter(c){
+    if(c==="all") show(products);
+    else show(products.filter(p=>p.cat===c));
+}
+
+function search(t){
+    t=t.toLowerCase();
+    show(products.filter(p=>p.name.toLowerCase().includes(t)));
+}
+
+function add(id){
+    const product = products.find(p=>p.id===id);
+    if(product.stock > 0) {
+        product.stock--; // 对应项目目标：实时库存更新
+        cart.push({...product}); // 加入购物车
+        update();
+        show(products); // 刷新界面
+    }
+}
+
+function update(){
+    document.getElementById("count").innerText = cart.length;
+    let total = 0, html = "";
+    cart.forEach((i)=>{
+        total += i.price;
+        html += `
+        <div class="cart-item">
+            <span>${i.name}</span>
+            <span style="font-weight:bold;">RM ${i.price.toFixed(2)}</span>
+        </div>`;
+    });
+    document.getElementById("items").innerHTML = html;
+    document.getElementById("total").innerText = total.toFixed(2);
+}
+
+function toggleCart(){
+    document.getElementById("cartPanel").classList.toggle("active");
+}
 </script>
+
 </body>
 </html>
