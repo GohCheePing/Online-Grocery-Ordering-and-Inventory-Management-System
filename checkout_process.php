@@ -2,40 +2,40 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "freshmart");
 
-// 1. 开启事务，确保数据一致性
-$conn->begin_transaction();
+$conn->begin_transaction(); // 开启事务
 
 try {
-    $customer_id = $_SESSION['user_id']; // 假设已登录
+    // 1. 插入 Order 总表 (对应 freshmart.sql 的 order 表)
+    $cust_id = $_SESSION['customer_id'] ?? 1; // 暂时假设 ID 为 1
     $total = $_POST['total_amount'];
-
-    // 2. 创建订单
-    $stmt = $conn->prepare("INSERT INTO `order` (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')");
-    $stmt->bind_param("id", $customer_id, $total);
+    
+    $stmt = $conn->prepare("INSERT INTO `order` (customer_id, total_amount) VALUES (?, ?)");
+    $stmt->bind_param("id", $cust_id, $total);
     $stmt->execute();
     $order_id = $conn->insert_id;
 
-    // 3. 处理购物车里的每一件商品
-    foreach($_SESSION['cart'] as $id => $qty) {
-        // 检查并扣除库存
-        $update_stock = $conn->prepare("UPDATE product SET stock_quantity = stock_quantity - ? WHERE product_id = ? AND stock_quantity >= ?");
-        $update_stock->bind_param("iii", $qty, $id, $qty);
-        $update_stock->execute();
+    // 2. 循环购物车扣库存 (对应目标 3: Reduce inventory shortages)
+    foreach($_SESSION['cart'] as $product_id => $quantity) {
+        // SQL 检查：只有当库存充足时才扣减
+        $update = $conn->prepare("UPDATE product SET stock_quantity = stock_quantity - ? WHERE product_id = ? AND stock_quantity >= ?");
+        $update->bind_param("iii", $quantity, $product_id, $quantity);
+        $update->execute();
 
-        if ($update_stock->affected_rows == 0) {
-            throw new Exception("Stock not enough for product ID: $id");
+        if($update->affected_rows == 0) {
+            throw new Exception("Stock insufficient for some items!");
         }
 
-        // 插入订单明细
-        $item_stmt = $conn->prepare("INSERT INTO order_item (order_id, product_id, quantity) VALUES (?, ?, ?)");
-        $item_stmt->bind_param("iii", $order_id, $id, $qty);
-        $item_stmt->execute();
+        // 3. 记录订单明细
+        $item = $conn->prepare("INSERT INTO order_item (order_id, product_id, quantity) VALUES (?, ?, ?)");
+        $item->bind_param("iii", $order_id, $product_id, $quantity);
+        $item->execute();
     }
 
     $conn->commit();
-    echo "Order Successful!";
+    unset($_SESSION['cart']); // 结账后清空购物车
+    echo "Success!";
 } catch (Exception $e) {
     $conn->rollback();
-    echo "Order Failed: " . $e->getMessage();
+    echo "Error: " . $e->getMessage();
 }
 ?>
