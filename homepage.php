@@ -1,26 +1,32 @@
 <?php
+// 1. Initialize session and database connection
 session_start();
 require 'db.php';
 
-// 1. Search Logic
+// 2. Search Logic: Filtering products by name
 $search_query = "";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
+    // Sanitize input to prevent SQL Injection
     $q = $conn->real_escape_string($_GET['query']);
     $search_query = " WHERE product_name LIKE '%$q%'";
 }
 
-// 2. Fetch Categories & Products
+// 3. Data Retrieval: Fetching categories for the navigation bar
 $categories_res = $conn->query("SELECT * FROM category");
+
+// 4. Data Retrieval: Fetching product list based on search criteria
 $products_res = $conn->query("SELECT * FROM product" . $search_query);
 $products = [];
-while($row = $products_res->fetch_assoc()) { $products[] = $row; }
+while($row = $products_res->fetch_assoc()) { 
+    $products[] = $row; 
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreshMart | Online Grocery</title>
+    <title>FreshMart | Online Grocery Store</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -72,15 +78,27 @@ while($row = $products_res->fetch_assoc()) { $products[] = $row; }
     </div>
 
     <script>
-        // Bridge PHP data to JavaScript
+        /**
+         * PHP to JS Bridge:
+         * Converting PHP array into JSON format for front-end processing.
+         */
         const allProducts = <?php echo json_encode($products); ?>;
 
+        /**
+         * Product Rendering Function:
+         * Generates HTML for product cards dynamically.
+         */
         function renderProducts(list) {
             const grid = document.getElementById("grid");
             let html = "";
             list.forEach(p => {
                 const isOut = parseInt(p.stock_quantity) <= 0;
-                // 把空格换成下划线来匹配图片名，如 "Fresh Milk" -> "fresh_milk.jpg"
+                
+                /**
+                 * Image Name Logic:
+                 * Convert product name to lowercase and replace spaces with underscores.
+                 * Example: "Fresh Milk" -> "fresh_milk.jpg"
+                 */
                 let fileName = p.product_name.toLowerCase().replace(/\s+/g, '_');
                 
                 html += `
@@ -98,10 +116,18 @@ while($row = $products_res->fetch_assoc()) { $products[] = $row; }
             grid.innerHTML = html || "<p>No products found.</p>";
         }
 
+        /**
+         * Category Filter Function:
+         * Allows users to switch categories without reloading the page.
+         */
         function filter(id) {
             id === 'all' ? renderProducts(allProducts) : renderProducts(allProducts.filter(x => x.category_id == id));
         }
 
+        /**
+         * Asynchronous Cart Update (AJAX):
+         * Sends data to manage_cart.php without refreshing the current page.
+         */
         function addToCart(id) {
             fetch('manage_cart.php?id=' + id)
             .then(res => res.text())
@@ -109,11 +135,14 @@ while($row = $products_res->fetch_assoc()) { $products[] = $row; }
                 if(data.trim() === "success") {
                     let cnt = document.getElementById("count");
                     cnt.innerText = parseInt(cnt.innerText) + 1;
-                    alert("Added to cart!");
+                    alert("Added to cart successfully!");
+                } else {
+                    alert("Unable to add. Product might be out of stock.");
                 }
             });
         }
 
+        // Execute initial render
         renderProducts(allProducts);
     </script>
 </body>

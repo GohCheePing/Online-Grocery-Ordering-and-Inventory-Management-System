@@ -6,16 +6,15 @@ if($_POST){
     $email = $_POST['email'];
     $pass = $_POST['password'];
 
-    // 修复：这里必须使用 -> 符号
     $stmt = $conn->prepare("SELECT * FROM customer WHERE email=?");
-    $stmt->bind_param("s", $email); // <--- 这里改成了 ->
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
 
     if($user && password_verify($pass, $user['password'])){
         $_SESSION['user_id'] = $user['customer_id'];
         header("Location: homepage.php");
-        exit(); // 习惯性加上 exit，防止跳转后代码继续执行
+        exit();
     } else {
         echo "<p style='color:red;'>Login Failed: Invalid email or password.</p>";
     }
