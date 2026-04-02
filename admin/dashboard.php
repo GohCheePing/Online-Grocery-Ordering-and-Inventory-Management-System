@@ -13,10 +13,10 @@ $res=$conn->query("SELECT * FROM `order`");
 <p>
 Order #<?php echo $o['order_id']; ?> -
 RM <?php echo $o['total_amount']; ?> -
-Status: <?php echo $o['order_status']; ?>
+<?php echo $o['order_status']; ?>
 
 <a href="update_status.php?id=<?php echo $o['order_id']; ?>">
-Mark Completed
+Complete
 </a>
 </p>
 <?php endwhile; ?>

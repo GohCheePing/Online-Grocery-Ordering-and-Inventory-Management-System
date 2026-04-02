@@ -2,44 +2,41 @@
 session_start();
 require 'db.php';
 
-$conn->begin_transaction();
-
-try{
-
-$total=$_POST['total'];
-$cust_id=$_SESSION['user_id'];
-
-$stmt=$conn->prepare("INSERT INTO `order` (customer_id,total_amount) VALUES (?,?)");
-$stmt->bind_param("id",$cust_id,$total);
-$stmt->execute();
-
-$order_id=$conn->insert_id;
-
-foreach($_SESSION['cart'] as $id=>$qty){
-
-$stmt=$conn->prepare("SELECT price,stock_quantity FROM product WHERE product_id=?");
-$stmt->bind_param("i",$id);
-$stmt->execute();
-$p=$stmt->get_result()->fetch_assoc();
-
-if($p['stock_quantity']<$qty) throw new Exception("Stock not enough");
-
-$upd=$conn->prepare("UPDATE product SET stock_quantity=stock_quantity-? WHERE product_id=?");
-$upd->bind_param("ii",$qty,$id);
-$upd->execute();
-
-$item=$conn->prepare("INSERT INTO order_item(order_id,product_id,quantity,price) VALUES(?,?,?,?)");
-$item->bind_param("iiid",$order_id,$id,$qty,$p['price']);
-$item->execute();
+if(!isset($_SESSION['user_id'])) {
+    die("Please <a href='login.php'>Login</a> to checkout.");
 }
 
-$conn->commit();
-unset($_SESSION['cart']);
+$conn->begin_transaction();
+try {
+    $total = $_POST['total'];
+    $user_id = $_SESSION['user_id'];
 
-echo "Order Success <a href='homepage.php'>Back</a>";
+    // 1. 创建订单
+    $stmt = $conn->prepare("INSERT INTO `order` (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')");
+    $stmt->bind_param("id", $user_id, $total);
+    $stmt->execute();
+    $order_id = $conn->insert_id;
 
-}catch(Exception $e){
-$conn->rollback();
-echo "Error: ".$e->getMessage();
+    // 2. 扣除库存并记录明细
+    foreach($_SESSION['cart'] as $id => $qty) {
+        // SQL 锁：确保库存充足才更新
+        $upd = $conn->prepare("UPDATE product SET stock_quantity = stock_quantity - ? WHERE product_id = ? AND stock_quantity >= ?");
+        $upd->bind_param("iii", $qty, $id, $qty);
+        $upd->execute();
+
+        if($upd->affected_rows == 0) throw new Exception("Insufficient stock for an item.");
+
+        $item = $conn->prepare("INSERT INTO order_item (order_id, product_id, quantity, price) VALUES (?, ?, ?, 0)");
+        $p_res = $conn->query("SELECT price FROM product WHERE product_id=$id")->fetch_assoc();
+        $item->bind_param("iiid", $order_id, $id, $qty, $p_res['price']);
+        $item->execute();
+    }
+
+    $conn->commit();
+    unset($_SESSION['cart']);
+    echo "<script>alert('Order Success!'); location.href='orders.php';</script>";
+} catch (Exception $e) {
+    $conn->rollback();
+    echo "Order Failed: " . $e->getMessage();
 }
 ?>

@@ -17,7 +17,7 @@ header("Location: dashboard.php");
 ?>
 
 <form method="POST">
-<input name="username">
-<input name="password">
+<input name="username"><br>
+<input name="password"><br>
 <button>Admin Login</button>
 </form>
