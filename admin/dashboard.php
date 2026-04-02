@@ -1,22 +1,32 @@
 <?php
+// Start session to track login state
 session_start();
+
+// Import database connection
 require '../db.php';
 
-if(!isset($_SESSION['admin'])) die("No access");
+// Security: If the user is not an admin, block access
+if(!isset($_SESSION['admin'])) {
+    die("Error: No administrative access.");
+}
 
-$res=$conn->query("SELECT * FROM `order`");
+// Fetch all orders from the database
+$res = $conn->query("SELECT * FROM `order`");
 ?>
 
 <h2>Admin Dashboard</h2>
 
-<?php while($o=$res->fetch_assoc()): ?>
+<?php 
+// Loop through every order in the database
+while($o = $res->fetch_assoc()): 
+?>
 <p>
-Order #<?php echo $o['order_id']; ?> -
-RM <?php echo $o['total_amount']; ?> -
-<?php echo $o['order_status']; ?>
+    Order #<?php echo $o['order_id']; ?> -
+    RM <?php echo $o['total_amount']; ?> -
+    Status: <?php echo $o['order_status']; ?>
 
-<a href="update_status.php?id=<?php echo $o['order_id']; ?>">
-Complete
-</a>
+    <a href="update_status.php?id=<?php echo $o['order_id']; ?>" style="color: green; font-weight: bold;">
+        Mark as Complete
+    </a>
 </p>
 <?php endwhile; ?>

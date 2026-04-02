@@ -1,12 +1,22 @@
 /* ================= GLOBAL COLORS ================= */
+/**
+ * CSS Variables:
+ * Using :root allows us to define primary colors in one place.
+ * This makes it easy to change the entire website's theme later.
+ */
 :root {
-    --main-green: #2ecc71;      /* 鲜亮的绿色 */
-    --dark-green: #27ae60;      /* 深绿色用于悬停 */
-    --light-bg: #f9f9f9;
-    --text-dark: #333;
+    --main-green: #2ecc71;      /* Bright green for primary buttons and bars */
+    --dark-green: #27ae60;      /* Darker shade for hover effects */
+    --light-bg: #f9f9f9;        /* Soft gray background for the body */
+    --text-dark: #333;          /* Dark gray for better readability */
 }
 
-/* ================= TOPBAR (最顶部小条) ================= */
+/* ================= TOPBAR ================= */
+/**
+ * Top Utility Bar:
+ * Displays secondary links like Admin Login or My Orders.
+ * 'justify-content: flex-end' pushes the links to the right side.
+ */
 .topbar {
     background: white;
     padding: 8px 10%;
@@ -20,12 +30,17 @@
 .topbar a {
     color: #666;
     text-decoration: none;
-    transition: 0.3s;
+    transition: 0.3s; /* Smooth color change during hover */
 }
 
 .topbar a:hover { color: var(--main-green); }
 
-/* ================= MAIN HEADER (主体) ================= */
+/* ================= MAIN HEADER ================= */
+/**
+ * Header Layout:
+ * Uses 'flexbox' to align the Logo, Search Bar, and Cart in a straight line.
+ * 'align-items: center' ensures all items are perfectly aligned vertically.
+ */
 .header {
     background: white;
     padding: 20px 10%;
@@ -40,17 +55,18 @@
     display: block;
 }
 
-/* 搜索框美化 */
+/* Search Bar Styling */
 .search {
-    flex: 1;
+    flex: 1; /* Allows the search bar to grow and fill available space */
     display: flex;
     max-width: 600px;
     border: 2px solid var(--main-green);
-    border-radius: 25px; /* 圆角矩形 */
-    overflow: hidden;
+    border-radius: 25px; /* Creates the "pill-shaped" rounded corners */
+    overflow: hidden; /* Ensures the button corners follow the border radius */
     transition: 0.3s;
 }
 
+/* Visual feedback when the user clicks into the search box */
 .search:focus-within {
     box-shadow: 0 0 8px rgba(46, 204, 113, 0.3);
 }
@@ -59,7 +75,7 @@
     flex: 1;
     padding: 12px 20px;
     border: none;
-    outline: none;
+    outline: none; /* Removes the default browser blue border */
     font-size: 14px;
 }
 
@@ -75,7 +91,7 @@
 
 .search button:hover { background: var(--dark-green); }
 
-/* 购物车样式 */
+/* Cart Button Styling */
 .cart {
     display: flex;
     align-items: center;
@@ -83,10 +99,15 @@
     color: var(--main-green);
     font-weight: bold;
     cursor: pointer;
-    white-space: nowrap;
+    white-space: nowrap; /* Prevents the text from wrapping to a second line */
 }
 
-/* ================= CATEGORIES BAR (分类栏) ================= */
+/* ================= CATEGORIES BAR ================= */
+/**
+ * Navigation Bar:
+ * Provides a clean background for category links.
+ * 'box-shadow' adds a subtle depth effect under the bar.
+ */
 .categories {
     background: var(--main-green);
     display: flex;
@@ -106,11 +127,15 @@
 }
 
 .cat:hover {
-    color: #f1c40f; /* 悬停变黄色点缀 */
-    transform: translateY(-2px);
+    color: #f1c40f; /* Yellow accent color on hover */
+    transform: translateY(-2px); /* Subtle "lift" animation */
 }
 
-/* ================= BANNER (大横幅) ================= */
+/* ================= BANNER ================= */
+/**
+ * Hero Banner:
+ * Uses a 'linear-gradient' to create a professional color transition.
+ */
 .banner {
     background: linear-gradient(135deg, var(--main-green), var(--dark-green));
     height: 180px;
