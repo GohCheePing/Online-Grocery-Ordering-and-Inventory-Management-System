@@ -1,28 +1,19 @@
 <?php
-// 1. Initialize session and database connection
 session_start();
 require 'db.php';
 
-/**
- * Search Logic:
- * Check if the user has entered a search term.
- * Use real_escape_string to prevent basic SQL Injection.
- */
+// 1. Search Logic
 $search_query = "";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $q = $conn->real_escape_string($_GET['query']);
     $search_query = " WHERE product_name LIKE '%$q%'";
 }
 
-// Fetch categories for the navigation bar
+// 2. Fetch Categories & Products
 $categories_res = $conn->query("SELECT * FROM category");
-
-// Fetch products based on the search query (if any)
 $products_res = $conn->query("SELECT * FROM product" . $search_query);
 $products = [];
-while($row = $products_res->fetch_assoc()) { 
-    $products[] = $row; 
-}
+while($row = $products_res->fetch_assoc()) { $products[] = $row; }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,15 +21,11 @@ while($row = $products_res->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FreshMart | Online Grocery</title>
-    <style>
-        /* [CSS Styles: Handling the Grid Layout and Theme Colors] */
-        :root { --main-green: #2ecc71; --dark-green: #27ae60; --text: #333; }
-        /* ... (styles omitted for brevity) ... */
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="top-bar">
+    <div class="topbar">
         <a href="admin/login.php">Admin Dashboard</a>
         <a href="orders.php">My Orders</a>
         <?php if(isset($_SESSION['user_id'])): ?>
@@ -48,65 +35,62 @@ while($row = $products_res->fetch_assoc()) {
         <?php endif; ?>
     </div>
 
-    <div class="main-header">
-        <a href="homepage.php" class="logo-text">FRESHMART</a>
+    <div class="header">
+        <div class="logo">
+            <a href="homepage.php" style="text-decoration:none; color:var(--main-green); font-size:24px; font-weight:bold;">FRESHMART</a>
+        </div>
         
-        <form class="search-container" action="homepage.php" method="GET">
+        <form class="search" action="homepage.php" method="GET">
             <input type="text" name="query" placeholder="Search fresh groceries..." value="<?php echo $_GET['query'] ?? ''; ?>">
             <button type="submit">Search</button>
         </form>
 
-        <a href="cart.php" class="cart-btn">
+        <a href="cart.php" class="cart" style="text-decoration:none;">
             🛒 My Cart ( <span id="count"><?php echo isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0; ?></span> )
         </a>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item" onclick="filter('all')">🏢 ALL</div>
+    <div class="categories">
+        <div class="cat" onclick="filter('all')">ALL</div>
         <?php while($cat = $categories_res->fetch_assoc()): ?>
-            <div class="nav-item" onclick="filter('<?php echo $cat['category_id']; ?>')">
+            <div class="cat" onclick="filter('<?php echo $cat['category_id']; ?>')">
                 <?php echo strtoupper($cat['category_name']); ?>
             </div>
         <?php endwhile; ?>
     </div>
 
-    <div class="hero-banner">
+    <div class="banner">
         <h1>FRESHMART</h1>
         <p>Premium Quality Groceries Delivered Fast</p>
     </div>
 
-    <div class="container">
-        <h2 class="section-title">Featured Products</h2>
-        <div class="product-grid" id="grid">
+    <div style="padding: 40px 10%;">
+        <h2 style="border-left: 5px solid var(--main-green); padding-left: 15px; margin-bottom: 25px;">Featured Products</h2>
+        
+        <div id="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px;">
             </div>
     </div>
 
     <script>
-        /**
-         * PHP to JavaScript Bridge:
-         * Convert the PHP array into a JSON object for client-side processing.
-         */
+        // Bridge PHP data to JavaScript
         const allProducts = <?php echo json_encode($products); ?>;
 
-        /**
-         * Render Function:
-         * Dynamically generates HTML cards for each product.
-         */
         function renderProducts(list) {
             const grid = document.getElementById("grid");
             let html = "";
             list.forEach(p => {
                 const isOut = parseInt(p.stock_quantity) <= 0;
-                // Normalize file name: Lowecase and replace spaces with underscores
+                // 把空格换成下划线来匹配图片名，如 "Fresh Milk" -> "fresh_milk.jpg"
                 let fileName = p.product_name.toLowerCase().replace(/\s+/g, '_');
                 
                 html += `
-                    <div class="product-card">
-                        <img src="images/${fileName}.jpg" onerror="this.onerror=null; this.src='images/default.jpg';">
-                        <h3>${p.product_name}</h3>
-                        <div class="price">RM ${parseFloat(p.price).toFixed(2)}</div>
+                    <div style="background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eee; transition: 0.3s;">
+                        <img src="images/${fileName}.jpg" onerror="this.onerror=null; this.src='images/default.jpg';" style="width: 100%; height: 160px; object-fit: contain; margin-bottom: 15px;">
+                        <h3 style="margin: 10px 0;">${p.product_name}</h3>
+                        <div style="color: var(--main-green); font-size: 20px; font-weight: 800; margin-bottom: 15px;">RM ${parseFloat(p.price).toFixed(2)}</div>
                         <div style="font-size:12px; color:#888; margin-bottom:10px;">Stock: ${p.stock_quantity}</div>
-                        <button class="add-btn" ${isOut ? 'disabled' : ''} onclick="addToCart(${p.product_id})">
+                        <button onclick="addToCart(${p.product_id})" ${isOut ? 'disabled' : ''} 
+                                style="background: var(--main-green); color: white; border: none; padding: 10px 0; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;">
                             ${isOut ? 'Out of Stock' : 'Add to Cart'}
                         </button>
                     </div>`;
@@ -114,24 +98,15 @@ while($row = $products_res->fetch_assoc()) {
             grid.innerHTML = html || "<p>No products found.</p>";
         }
 
-        /**
-         * Category Filter:
-         * Filters the product list based on Category ID without reloading the page.
-         */
         function filter(id) {
             id === 'all' ? renderProducts(allProducts) : renderProducts(allProducts.filter(x => x.category_id == id));
         }
 
-        /**
-         * AJAX Add to Cart:
-         * Communicates with manage_cart.php in the background to update the session.
-         */
         function addToCart(id) {
             fetch('manage_cart.php?id=' + id)
             .then(res => res.text())
             .then(data => {
                 if(data.trim() === "success") {
-                    // Update the cart counter UI immediately
                     let cnt = document.getElementById("count");
                     cnt.innerText = parseInt(cnt.innerText) + 1;
                     alert("Added to cart!");
@@ -139,7 +114,6 @@ while($row = $products_res->fetch_assoc()) {
             });
         }
 
-        // Initial render on page load
         renderProducts(allProducts);
     </script>
 </body>

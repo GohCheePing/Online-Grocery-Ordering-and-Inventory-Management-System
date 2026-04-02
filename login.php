@@ -1,39 +1,22 @@
 <?php
-// 1. Start the session to track the customer's login status
 session_start();
-
-// 2. Include the database connection
 require 'db.php';
 
-// 3. Check if the login form has been submitted via POST
 if($_POST){
     $email = $_POST['email'];
     $pass = $_POST['password'];
 
-    /**
-     * Security: Prepared Statement
-     * Use a prepared statement to securely fetch user data by email.
-     * This prevents SQL Injection attacks.
-     */
+    // 修复：这里必须使用 -> 符号
     $stmt = $conn->prepare("SELECT * FROM customer WHERE email=?");
-    $stmt.bind_param("s", $email);
+    $stmt->bind_param("s", $email); // <--- 这里改成了 ->
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
 
-    /**
-     * Password Verification:
-     * Check if the user exists and verify the plain-text password 
-     * against the hashed password stored in the database.
-     */
     if($user && password_verify($pass, $user['password'])){
-        // Store the customer's unique ID in the session
         $_SESSION['user_id'] = $user['customer_id'];
-        
-        // Redirect the user to the store homepage
         header("Location: homepage.php");
-        exit();
+        exit(); // 习惯性加上 exit，防止跳转后代码继续执行
     } else {
-        // Error message for failed login attempts
         echo "<p style='color:red;'>Login Failed: Invalid email or password.</p>";
     }
 }
@@ -49,5 +32,4 @@ if($_POST){
     
     <button type="submit">Login</button>
 </form>
-
 <p>Don't have an account? <a href="register.php">Register here</a></p>
