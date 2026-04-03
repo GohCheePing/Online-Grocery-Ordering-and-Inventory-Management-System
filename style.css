@@ -1,0 +1,151 @@
+/* ================= GLOBAL COLORS ================= */
+/**
+ * CSS Variables:
+ * Using :root allows us to define primary colors in one place.
+ * This makes it easy to change the entire website's theme later.
+ */
+:root {
+    --main-green: #2ecc71;      /* Bright green for primary buttons and bars */
+    --dark-green: #27ae60;      /* Darker shade for hover effects */
+    --light-bg: #f9f9f9;        /* Soft gray background for the body */
+    --text-dark: #333;          /* Dark gray for better readability */
+}
+
+/* ================= TOPBAR ================= */
+/**
+ * Top Utility Bar:
+ * Displays secondary links like Admin Login or My Orders.
+ * 'justify-content: flex-end' pushes the links to the right side.
+ */
+.topbar {
+    background: white;
+    padding: 8px 10%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
+}
+
+.topbar a {
+    color: #666;
+    text-decoration: none;
+    transition: 0.3s; /* Smooth color change during hover */
+}
+
+.topbar a:hover { color: var(--main-green); }
+
+/* ================= MAIN HEADER ================= */
+/**
+ * Header Layout:
+ * Uses 'flexbox' to align the Logo, Search Bar, and Cart in a straight line.
+ * 'align-items: center' ensures all items are perfectly aligned vertically.
+ */
+.header {
+    background: white;
+    padding: 20px 10%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.logo img {
+    height: 50px;
+    display: block;
+}
+
+/* Search Bar Styling */
+.search {
+    flex: 1; /* Allows the search bar to grow and fill available space */
+    display: flex;
+    max-width: 600px;
+    border: 2px solid var(--main-green);
+    border-radius: 25px; /* Creates the "pill-shaped" rounded corners */
+    overflow: hidden; /* Ensures the button corners follow the border radius */
+    transition: 0.3s;
+}
+
+/* Visual feedback when the user clicks into the search box */
+.search:focus-within {
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.3);
+}
+
+.search input {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    outline: none; /* Removes the default browser blue border */
+    font-size: 14px;
+}
+
+.search button {
+    background: var(--main-green);
+    color: white;
+    border: none;
+    padding: 0 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.search button:hover { background: var(--dark-green); }
+
+/* Cart Button Styling */
+.cart {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--main-green);
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap; /* Prevents the text from wrapping to a second line */
+}
+
+/* ================= CATEGORIES BAR ================= */
+/**
+ * Navigation Bar:
+ * Provides a clean background for category links.
+ * 'box-shadow' adds a subtle depth effect under the bar.
+ */
+.categories {
+    background: var(--main-green);
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 12px 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.cat {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cat:hover {
+    color: #f1c40f; /* Yellow accent color on hover */
+    transform: translateY(-2px); /* Subtle "lift" animation */
+}
+
+/* ================= BANNER ================= */
+/**
+ * Hero Banner:
+ * Uses a 'linear-gradient' to create a professional color transition.
+ */
+.banner {
+    background: linear-gradient(135deg, var(--main-green), var(--dark-green));
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+}
+
+.banner h1 { margin: 0; font-size: 40px; letter-spacing: 2px; }
+.banner p { opacity: 0.9; margin-top: 10px; }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-03-17 11:40:34
+-- 生成日期： 2026-04-02 17:35:03
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -43,6 +43,15 @@ CREATE TABLE `category` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `category`
+--
+
+INSERT INTO `category` (`category_id`, `category_name`) VALUES
+(1, 'Fruit'),
+(2, 'Vegetable'),
+(3, 'Dairy');
 
 -- --------------------------------------------------------
 
@@ -103,6 +112,18 @@ CREATE TABLE `product` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- 转存表中的数据 `product`
+--
+
+INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`) VALUES
+(1, 'Apple', 3.50, 50, 10, 1),
+(2, 'Banana', 2.00, 40, 10, 1),
+(3, 'Tomato', 2.20, 30, 5, 2),
+(4, 'Carrot', 1.50, 60, 5, 2),
+(5, 'Milk', 8.80, 20, 5, 3),
+(6, 'Cheese', 12.50, 15, 5, 3);
+
+--
 -- 转储表的索引
 --
 
@@ -130,23 +151,19 @@ ALTER TABLE `customer`
 -- 表的索引 `order`
 --
 ALTER TABLE `order`
-  ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`);
+  ADD PRIMARY KEY (`order_id`);
 
 --
 -- 表的索引 `order_item`
 --
 ALTER TABLE `order_item`
-  ADD PRIMARY KEY (`order_item_id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD PRIMARY KEY (`order_item_id`);
 
 --
 -- 表的索引 `product`
 --
 ALTER TABLE `product`
-  ADD PRIMARY KEY (`product_id`),
-  ADD KEY `category_id` (`category_id`);
+  ADD PRIMARY KEY (`product_id`);
 
 --
 -- 在导出的表使用AUTO_INCREMENT
@@ -162,7 +179,7 @@ ALTER TABLE `admin`
 -- 使用表AUTO_INCREMENT `category`
 --
 ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- 使用表AUTO_INCREMENT `customer`
@@ -186,30 +203,7 @@ ALTER TABLE `order_item`
 -- 使用表AUTO_INCREMENT `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- 限制导出的表
---
-
---
--- 限制表 `order`
---
-ALTER TABLE `order`
-  ADD CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
-
---
--- 限制表 `order_item`
---
-ALTER TABLE `order_item`
-  ADD CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
-  ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
-
---
--- 限制表 `product`
---
-ALTER TABLE `product`
-  ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`);
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
