@@ -1,20 +1,38 @@
 <?php
-// 1. Initialize the session to access existing session data
+/**
+ * 1. Initialize the session to access active data.
+ */
 session_start();
 
 /**
- * Session Termination:
- * session_destroy() removes all data associated with the current session.
- * This effectively logs the user out by clearing their ID and Cart.
+ * 2. Clear all session variables.
+ */
+session_unset();
+
+/**
+ * 3. Destroy the session entirely.
  */
 session_destroy();
 
 /**
- * Redirection:
- * Send the user back to the Login page immediately after logging out.
+ * 4. Display a simple message instead of redirecting.
  */
-header("Location: login.php");
-
-// Stop script execution to ensure the redirect happens safely
-exit();
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logout Successful</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        .msg { color: #27ae60; font-weight: bold; font-size: 20px; }
+        a { color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="msg">You have been logged out successfully.</div>
+    <p>Thank you for shopping at FreshMart!</p>
+    <br>
+    <a href="homepage.php">Return to Shop</a> | <a href="login.php">Login Again</a>
+</body>
+</html>
