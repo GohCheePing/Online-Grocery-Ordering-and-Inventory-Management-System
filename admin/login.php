@@ -96,5 +96,6 @@ togglePassword.addEventListener('click', function () {
 });
 </script>
 
+
 </body>
 </html>
