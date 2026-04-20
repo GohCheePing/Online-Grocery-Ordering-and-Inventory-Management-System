@@ -99,11 +99,18 @@
 .cart {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     color: var(--main-green);
     font-weight: bold;
     cursor: pointer;
+    text-decoration: none;
     white-space: nowrap; /* Prevents the text from wrapping to a second line */
+}
+
+.cart i {
+    margin-right: 6px;
+    font-size: 18px;
+    color: var(--main-green);
 }
 
 /* ================= CATEGORIES BAR ================= */

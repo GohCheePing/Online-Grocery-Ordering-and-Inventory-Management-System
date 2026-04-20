@@ -27,6 +27,7 @@ while($row = $products_res->fetch_assoc()) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FreshMart</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
@@ -54,8 +55,10 @@ while($row = $products_res->fetch_assoc()) {
         <button>Search</button>
     </form>
 
-    <a href="cart.php" class="cart" style="text-decoration:none;">
-        Cart (<span id="count"><?php echo isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0; ?></span>)
+    <a href="cart.php" class="cart">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>Cart</span>
+    (<span id="count"><?php echo isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0; ?></span>)
     </a>
 </div>
 
