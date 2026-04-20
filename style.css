@@ -113,7 +113,7 @@
  * 'box-shadow' adds a subtle depth effect under the bar.
  */
 .categories {
-    background: var(--main-green);
+    background: var(--text-dark);
     display: flex;
     justify-content: center;
     gap: 40px;
