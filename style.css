@@ -23,7 +23,8 @@
     display: flex;
     justify-content: flex-end;
     gap: 20px;
-    font-size: 13px;
+    font-size: 18px;
+    font-weight: 600;
     border-bottom: 1px solid #eee;
 }
 
@@ -33,7 +34,10 @@
     transition: 0.3s; /* Smooth color change during hover */
 }
 
-.topbar a:hover { color: var(--main-green); }
+.topbar a:hover { 
+    color: var(--main-green);
+    transform: scale(1.1); 
+}
 
 /* ================= MAIN HEADER ================= */
 /**
