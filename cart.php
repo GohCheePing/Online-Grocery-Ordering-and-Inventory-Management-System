@@ -1,7 +1,5 @@
 <?php
-// 1. Initialize session to retrieve stored cart items
 session_start();
-// 2. Connect to the database to get latest product prices and names
 require 'db.php';
 ?>
 <!DOCTYPE html>
@@ -10,49 +8,165 @@ require 'db.php';
     <title>Your Cart - FreshMart</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="padding: 40px; background-color: #f4f7f6;">
-    <h2>Your Shopping Cart</h2>
-    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <?php
-        // Initialize total amount variable
-        $total = 0;
 
-        /**
-         * Cart Validation:
-         * Check if the session cart array is not empty before processing.
-         */
-        if(!empty($_SESSION['cart'])):
-            // Loop through each item ID and its quantity stored in the session
-            foreach($_SESSION['cart'] as $id => $qty):
-                // Fetch current product details from the database using the ID
-                $p = $conn->query("SELECT * FROM product WHERE product_id = $id")->fetch_assoc();
-                
-                // Calculate subtotal for this specific product
-                $sub = $p['price'] * $qty;
-                // Add the subtotal to the grand total
-                $total += $sub;
-        ?>
-            <div class="cart-item" style="border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between;">
-                <span><strong><?php echo $p['product_name']; ?></strong></span>
-                <span>RM <?php echo number_format($p['price'], 2); ?> x <?php echo $qty; ?></span>
-                <span style="font-weight: bold;">RM <?php echo number_format($sub, 2); ?></span>
-            </div>
-        <?php endforeach; ?>
+<body class="cart-page">
 
-            <h3 style="text-align: right; margin-top: 20px; color: #27ae60;">
-                Total: RM <?php echo number_format($total, 2); ?>
-            </h3>
+<div class="cart-header">
+    <a href="homepage.php" class="back-btn">← Continue Shopping</a>
+    <div class="cart-title">Shopping Cart</div>
+</div>
 
-            <form action="checkout_process.php" method="POST" style="text-align: right;">
-                <input type="hidden" name="total" value="<?php echo $total; ?>">
-                <button class="btn-checkout" style="background: #2ecc71; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    Proceed to Checkout
-                </button>
-            </form>
+<h2>🛒 Your Shopping Cart</h2>
 
-        <?php else: ?>
-            <p>Your cart is empty. <a href="homepage.php" style="color: #2ecc71;">Go shopping now</a></p>
-        <?php endif; ?>
+<?php
+$total = 0;
+if(!empty($_SESSION['cart'])):
+?>
+
+<div class="cart-container">
+
+<!-- LEFT -->
+<div class="cart-items">
+
+<?php foreach($_SESSION['cart'] as $id => $qty):
+    $p = $conn->query("SELECT * FROM product WHERE product_id = $id")->fetch_assoc();
+    $sub = $p['price'] * $qty;
+    $total += $sub;
+?>
+
+<div class="cart-row"
+     data-id="<?php echo $id; ?>"
+     data-price="<?php echo $p['price']; ?>">
+
+    <div class="cart-img">
+        <img src="images/<?php echo strtolower(str_replace(' ','_',$p['product_name'])); ?>.jpg"
+             onerror="this.src='images/default.jpeg'">
     </div>
+
+    <div class="cart-left">
+        <div class="cart-name"><?php echo $p['product_name']; ?></div>
+        <div class="cart-price">RM <?php echo number_format($p['price'],2); ?></div>
+    </div>
+
+    <div class="cart-middle">
+        <button class="qty-btn" onclick="updateCart(<?php echo $id; ?>,'minus')">-</button>
+
+        <input class="qty-input"
+               type="number"
+               min="1"
+               value="<?php echo $qty; ?>"
+               onchange="setQty(<?php echo $id; ?>, this.value)">
+
+        <button class="qty-btn plus" onclick="updateCart(<?php echo $id; ?>,'plus')">+</button>
+    </div>
+
+    <div class="cart-right">
+        <span class="subtotal">RM <?php echo number_format($sub,2); ?></span>
+    </div>
+
+    <div class="cart-remove">
+        <button class="remove-btn"
+                onclick="updateCart(<?php echo $id; ?>,'remove')">
+            Remove
+        </button>
+    </div>
+
+</div>
+
+<?php endforeach; ?>
+
+</div>
+
+<!-- RIGHT -->
+<div class="cart-summary">
+    <h3>Order Summary</h3>
+
+    <p>Total Items: <span id="items"><?php echo array_sum($_SESSION['cart']); ?></span></p>
+
+    <h2 id="total">RM <?php echo number_format($total,2); ?></h2>
+
+    <form action="checkout_process.php" method="POST">
+        <input type="hidden" name="total" value="<?php echo $total; ?>">
+        <button class="checkout-btn">Checkout</button>
+    </form>
+</div>
+
+</div>
+
+<?php else: ?>
+<p>Your cart is empty 😢 <a href="homepage.php">Go shopping</a></p>
+<?php endif; ?>
+
+
+<script>
+function setQty(id, value){
+    value = parseInt(value);
+
+    if(value <= 0){
+        updateCart(id, 'remove');
+        return;
+    }
+
+    fetch(`manage_cart.php?id=${id}&action=set&qty=${value}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success"){
+            updateUI(data.cart);
+        }
+    });
+}
+
+function updateCart(id, action){
+    fetch(`manage_cart.php?id=${id}&action=${action}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success"){
+            updateUI(data.cart);
+        }
+    });
+}
+
+function updateUI(cart){
+
+    let total = 0;
+    let totalItems = 0;
+
+    document.querySelectorAll('.cart-row').forEach(row => {
+
+        let id = row.dataset.id;
+
+        if(!cart[id]){
+            row.remove();
+            return;
+        }
+
+        let qty = cart[id];
+        let price = parseFloat(row.dataset.price);
+
+        row.querySelector('.qty-input').value = qty;
+
+        let sub = qty * price;
+        row.querySelector('.subtotal').innerText = "RM " + sub.toFixed(2);
+
+        total += sub;
+        totalItems += qty;
+    });
+
+    document.getElementById("total").innerText = "RM " + total.toFixed(2);
+    document.getElementById("items").innerText = totalItems;
+
+    // 更新 homepage cart icon
+    let cartCount = document.getElementById("count");
+    if(cartCount){
+        cartCount.innerText = totalItems;
+    }
+
+    if(Object.keys(cart).length === 0){
+        document.querySelector('.cart-container').innerHTML =
+            "<p>Your cart is empty 😢 <a href='homepage.php'>Go shopping</a></p>";
+    }
+}
+</script>
+
 </body>
 </html>

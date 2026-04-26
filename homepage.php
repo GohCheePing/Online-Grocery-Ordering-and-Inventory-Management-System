@@ -130,20 +130,40 @@ while($row = $products_res->fetch_assoc()) {
          */
         function addToCart(id) {
             fetch('manage_cart.php?id=' + id)
-            .then(res => res.text())
+            .then(res => res.json())
             .then(data => {
-                if(data.trim() === "success") {
-                    let cnt = document.getElementById("count");
-                    cnt.innerText = parseInt(cnt.innerText) + 1;
-                    alert("Added to cart successfully!");
+
+                if(data.status === "success"){
+
+                    let total = 0;
+                    for(let k in data.cart){
+                        total += data.cart[k];
+                    }
+
+                    document.getElementById("count").innerText = total;
+
+                    showToast("Added to cart");
                 } else {
-                    alert("Unable to add. Product might be out of stock.");
+                    showToast("Out of stock");
                 }
             });
         }
 
         // Execute initial render
         renderProducts(allProducts);
+    </script>
+    <div id="toast"></div>
+
+    <script>
+    function showToast(msg){
+        let t = document.getElementById("toast");
+        t.innerText = msg;
+        t.style.display = "block";
+
+        setTimeout(()=>{
+            t.style.display = "none";
+        },1500);
+    }
     </script>
 </body>
 </html>
