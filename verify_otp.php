@@ -72,11 +72,28 @@ if(isset($_POST['verify'])){
 
             unset($_SESSION['register']);
 
-            echo "<script>
-                alert('Register successful!');
+            echo "
+            <div style='
+            max-width:420px;
+            margin:100px auto;
+            padding:30px;
+            text-align:center;
+            background:white;
+            border-radius:15px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.1);
+        '>
+            <h3 style='color:green;'>✅ Register Successful!</h3>
+            <p>Redirecting to login page...</p>
+        </div>
+
+       <script>
+            setTimeout(function(){
                 window.location.href='login.php';
-            </script>";
-            exit();
+        }, 2000); // 2秒后跳转
+        </script>
+        ";
+        exit();
+
         }
         else {
             $error = "Wrong OTP";
