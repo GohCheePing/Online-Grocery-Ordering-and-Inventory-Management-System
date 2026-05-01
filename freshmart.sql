@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-01 15:58:43
+-- 生成日期： 2026-05-01 17:21:27
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -164,19 +164,23 @@ ALTER TABLE `customer`
 -- 表的索引 `order`
 --
 ALTER TABLE `order`
-  ADD PRIMARY KEY (`order_id`);
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `customer_id` (`customer_id`);
 
 --
 -- 表的索引 `order_item`
 --
 ALTER TABLE `order_item`
-  ADD PRIMARY KEY (`order_item_id`);
+  ADD PRIMARY KEY (`order_item_id`),
+  ADD KEY `fk_order_item_order` (`order_id`),
+  ADD KEY `fk_order_item_product` (`product_id`);
 
 --
 -- 表的索引 `product`
 --
 ALTER TABLE `product`
-  ADD PRIMARY KEY (`product_id`);
+  ADD PRIMARY KEY (`product_id`),
+  ADD KEY `category_id` (`category_id`);
 
 --
 -- 在导出的表使用AUTO_INCREMENT
@@ -217,6 +221,29 @@ ALTER TABLE `order_item`
 --
 ALTER TABLE `product`
   MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- 限制导出的表
+--
+
+--
+-- 限制表 `order`
+--
+ALTER TABLE `order`
+  ADD CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
+
+--
+-- 限制表 `order_item`
+--
+ALTER TABLE `order_item`
+  ADD CONSTRAINT `fk_order_item_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
+  ADD CONSTRAINT `fk_order_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
+
+--
+-- 限制表 `product`
+--
+ALTER TABLE `product`
+  ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db.php';
+require '../db.php';
 
 $error = "";
 $success = "";
@@ -9,66 +9,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
     $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $confirm = $_POST['confirm_password'];
 
-    if ($password !== $confirm_password) {
-        $error = "Passwords do not match.";
+    if ($password !== $confirm) {
+        $error = "Password not match";
     } else {
-        $checkStmt = $conn->prepare("SELECT id FROM admins WHERE email = ?");
-        $checkStmt->bind_param("s", $email);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
 
-        if ($checkResult->num_rows > 0) {
-            $error = "Admin email already exists.";
+        $check = $conn->prepare("SELECT id FROM admin WHERE email=?");
+        $check->bind_param("s",$email);
+        $check->execute();
+        $res = $check->get_result();
+
+        if ($res->num_rows > 0) {
+            $error = "Email exists";
         } else {
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = $conn->prepare("INSERT INTO admins (full_name, email, admin_password) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $full_name, $email, $hashed_password);
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $username = strtolower(str_replace(['@','.'], '_', $email));
+
+            $stmt = $conn->prepare("INSERT INTO admin(username,full_name,email,admin_password) VALUES(?,?,?,?)");
+            $stmt->bind_param("ssss",$username,$full_name,$email,$hash);
 
             if ($stmt->execute()) {
-                $success = "New admin registered successfully.";
+                $success = "Register success";
             } else {
-                $error = "Failed to register admin.";
+                $error = "Fail";
             }
         }
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Register</title>
-</head>
-<body>
-    <h2>Register New Admin</h2>
+<h2>Register Admin</h2>
 
-    <?php if (!empty($error)) : ?>
-        <p style="color:red;"><?php echo $error; ?></p>
-    <?php endif; ?>
+<?php
+if ($error) echo "<p style='color:red'>" . htmlspecialchars($error) . "</p>";
+if ($success) echo "<p style='color:green'>" . htmlspecialchars($success) . "</p>";
+?>
 
-    <?php if (!empty($success)) : ?>
-        <p style="color:green;"><?php echo $success; ?></p>
-    <?php endif; ?>
-
-    <form method="POST">
-        <label>Full Name:</label><br>
-        <input type="text" name="full_name" required><br><br>
-
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
-
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
-
-        <label>Confirm Password:</label><br>
-        <input type="password" name="confirm_password" required><br><br>
-
-        <button type="submit">Register Admin</button>
-    </form>
-</body>
-</html>
+<form method="POST">
+Full Name: <input name="full_name" required><br><br>
+Email: <input name="email" type="email" required><br><br>
+Password: <input type="password" name="password" required><br><br>
+Confirm: <input type="password" name="confirm_password" required><br><br>
+<button>Register</button>
+</form>
