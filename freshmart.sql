@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-01 17:21:27
+-- 生成日期： 2026-05-01 17:43:10
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -83,10 +83,10 @@ INSERT INTO `customer` (`customer_id`, `name`, `email`, `password`, `phone`, `ad
 -- --------------------------------------------------------
 
 --
--- 表的结构 `order`
+-- 表的结构 `orders`
 --
 
-CREATE TABLE `order` (
+CREATE TABLE `orders` (
   `order_id` int(11) NOT NULL,
   `customer_id` int(11) DEFAULT NULL,
   `order_date` datetime DEFAULT current_timestamp(),
@@ -161,9 +161,9 @@ ALTER TABLE `customer`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- 表的索引 `order`
+-- 表的索引 `orders`
 --
-ALTER TABLE `order`
+ALTER TABLE `orders`
   ADD PRIMARY KEY (`order_id`),
   ADD KEY `customer_id` (`customer_id`);
 
@@ -172,8 +172,8 @@ ALTER TABLE `order`
 --
 ALTER TABLE `order_item`
   ADD PRIMARY KEY (`order_item_id`),
-  ADD KEY `fk_order_item_order` (`order_id`),
-  ADD KEY `fk_order_item_product` (`product_id`);
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `product_id` (`product_id`);
 
 --
 -- 表的索引 `product`
@@ -205,9 +205,9 @@ ALTER TABLE `customer`
   MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- 使用表AUTO_INCREMENT `order`
+-- 使用表AUTO_INCREMENT `orders`
 --
-ALTER TABLE `order`
+ALTER TABLE `orders`
   MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -227,23 +227,23 @@ ALTER TABLE `product`
 --
 
 --
--- 限制表 `order`
+-- 限制表 `orders`
 --
-ALTER TABLE `order`
-  ADD CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE;
 
 --
 -- 限制表 `order_item`
 --
 ALTER TABLE `order_item`
-  ADD CONSTRAINT `fk_order_item_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
-  ADD CONSTRAINT `fk_order_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
+  ADD CONSTRAINT `fk_item_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE;
 
 --
 -- 限制表 `product`
 --
 ALTER TABLE `product`
-  ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`);
+  ADD CONSTRAINT `fk_product_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
