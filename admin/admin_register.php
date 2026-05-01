@@ -6,6 +6,7 @@ $error = "";
 $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -15,8 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Password not match";
     } else {
 
-        $check = $conn->prepare("SELECT id FROM admin WHERE email=?");
-        $check->bind_param("s",$email);
+        $check = $conn->prepare("SELECT id FROM admin WHERE email=? LIMIT 1");
+        $check->bind_param("s", $email);
         $check->execute();
         $res = $check->get_result();
 
@@ -28,12 +29,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $username = strtolower(str_replace(['@','.'], '_', $email));
 
             $stmt = $conn->prepare("INSERT INTO admin(username,full_name,email,admin_password) VALUES(?,?,?,?)");
-            $stmt->bind_param("ssss",$username,$full_name,$email,$hash);
+            $stmt->bind_param("ssss", $username, $full_name, $email, $hash);
 
             if ($stmt->execute()) {
                 $success = "Register success";
             } else {
-                $error = "Fail";
+                $error = "Fail to register";
             }
         }
     }

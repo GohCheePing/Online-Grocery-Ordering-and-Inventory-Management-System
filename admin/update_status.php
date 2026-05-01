@@ -7,17 +7,11 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-if (!isset($_GET['id'])) {
-    die("Invalid");
-}
-
 $id = (int)$_GET['id'];
 
-$stmt = $conn->prepare("UPDATE `orders` SET order_status='Completed' WHERE order_id=?");
-$stmt->bind_param("i",$id);
-if (!$stmt->execute()) {
-    die("Update failed");
-}
+$stmt = $conn->prepare("UPDATE orders SET order_status='Completed' WHERE order_id=?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
 
 header("Location: manage_orders.php");
 exit();

@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 $res = $conn->query("
     SELECT o.*, c.name 
-    FROM `orders` o
+    FROM orders o
     LEFT JOIN customer c ON o.customer_id = c.customer_id
     ORDER BY o.order_id DESC
 ");
@@ -28,15 +28,13 @@ $res = $conn->query("
 
 <?php while($row = $res->fetch_assoc()): ?>
 <tr>
-    <td><?php echo $row['order_id']; ?></td>
-    <td><?php echo htmlspecialchars($row['name'] ?? 'Guest'); ?></td>
-    <td>RM <?php echo number_format($row['total_amount'] ?? 0, 2); ?></td>
-    <td><?php echo $row['order_status']; ?></td>
+    <td><?= $row['order_id'] ?></td>
+    <td><?= htmlspecialchars($row['name'] ?? 'Guest') ?></td>
+    <td>RM <?= number_format($row['total_amount'],2) ?></td>
+    <td><?= $row['order_status'] ?></td>
     <td>
         <?php if($row['order_status'] != 'Completed'): ?>
-        <a href="update_status.php?id=<?php echo $row['order_id']; ?>">
-            Complete
-        </a>
+            <a href="update_status.php?id=<?= $row['order_id'] ?>">Complete</a>
         <?php endif; ?>
     </td>
 </tr>
