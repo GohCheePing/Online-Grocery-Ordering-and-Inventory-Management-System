@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-04-02 17:35:03
+-- 生成日期： 2026-05-01 15:25:04
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -65,8 +65,18 @@ CREATE TABLE `customer` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `address` text DEFAULT NULL
+  `address` text DEFAULT NULL,
+  `otp_code` varchar(10) DEFAULT NULL,
+  `otp_expiry` datetime DEFAULT NULL,
+  `is_verified` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `customer`
+--
+
+INSERT INTO `customer` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `otp_code`, `otp_expiry`, `is_verified`) VALUES
+(12, 'tt', 'yilingh21@gmail.com', '$2y$10$/z28IbumZgOVy1piEqnoHOs3vd6mVut777VMAYJpf5w3qihmdAr1e', NULL, NULL, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -185,7 +195,7 @@ ALTER TABLE `category`
 -- 使用表AUTO_INCREMENT `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- 使用表AUTO_INCREMENT `order`
