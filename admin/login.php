@@ -13,10 +13,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
 
     $user = $result->fetch_assoc();
+    $stmt->close();
 
     if ($user && password_verify($pass, $user['admin_password'])) {
 

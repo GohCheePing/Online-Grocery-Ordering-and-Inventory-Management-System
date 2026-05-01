@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-01 17:43:10
+-- 生成日期： 2026-05-01 17:49:37
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -34,6 +34,13 @@ CREATE TABLE `admin` (
   `full_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `admin`
+--
+
+INSERT INTO `admin` (`id`, `username`, `admin_password`, `full_name`, `email`) VALUES
+(1, 'admin', NULL, 'System Admin', 'admin@freshmart.com');
 
 -- --------------------------------------------------------
 
@@ -78,7 +85,7 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `otp_code`, `otp_expiry`, `is_verified`) VALUES
-(12, 'tt', 'yilingh21@gmail.com', '$2y$10$/z28IbumZgOVy1piEqnoHOs3vd6mVut777VMAYJpf5w3qihmdAr1e', NULL, NULL, NULL, NULL, 1);
+(12, 'tt', 'test@gmail.com', '$2y$10$examplehash', NULL, NULL, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -93,6 +100,13 @@ CREATE TABLE `orders` (
   `total_amount` decimal(10,2) DEFAULT NULL,
   `order_status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `customer_id`, `order_date`, `total_amount`, `order_status`) VALUES
+(1, 12, '2026-05-01 15:49:32', 25.50, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -143,9 +157,7 @@ INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, 
 -- 表的索引 `admin`
 --
 ALTER TABLE `admin`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- 表的索引 `category`
@@ -157,30 +169,29 @@ ALTER TABLE `category`
 -- 表的索引 `customer`
 --
 ALTER TABLE `customer`
-  ADD PRIMARY KEY (`customer_id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD PRIMARY KEY (`customer_id`);
 
 --
 -- 表的索引 `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`);
+  ADD KEY `fk_orders_customer` (`customer_id`);
 
 --
 -- 表的索引 `order_item`
 --
 ALTER TABLE `order_item`
   ADD PRIMARY KEY (`order_item_id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD KEY `fk_order_item_order` (`order_id`),
+  ADD KEY `fk_order_item_product` (`product_id`);
 
 --
 -- 表的索引 `product`
 --
 ALTER TABLE `product`
   ADD PRIMARY KEY (`product_id`),
-  ADD KEY `category_id` (`category_id`);
+  ADD KEY `fk_product_category` (`category_id`);
 
 --
 -- 在导出的表使用AUTO_INCREMENT
@@ -190,7 +201,7 @@ ALTER TABLE `product`
 -- 使用表AUTO_INCREMENT `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- 使用表AUTO_INCREMENT `category`
@@ -208,7 +219,7 @@ ALTER TABLE `customer`
 -- 使用表AUTO_INCREMENT `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- 使用表AUTO_INCREMENT `order_item`
@@ -230,14 +241,14 @@ ALTER TABLE `product`
 -- 限制表 `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE SET NULL;
 
 --
 -- 限制表 `order_item`
 --
 ALTER TABLE `order_item`
-  ADD CONSTRAINT `fk_item_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_order_item_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_order_item_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE;
 
 --
 -- 限制表 `product`
