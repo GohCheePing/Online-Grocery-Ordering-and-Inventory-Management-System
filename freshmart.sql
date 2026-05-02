@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 13:18:36
+-- 生成日期： 2026-05-02 13:20:31
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -194,6 +194,7 @@ CREATE TABLE `promo_usage` (
 `promo_code` varchar(50)
 ,`usage_count` bigint(21)
 ,`total_discount` decimal(32,2)
+,`total_revenue` decimal(32,2)
 );
 
 -- --------------------------------------------------------
@@ -212,7 +213,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `promo_usage`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `promo_usage`  AS SELECT `orders`.`promo_code` AS `promo_code`, count(`orders`.`order_id`) AS `usage_count`, sum(`orders`.`discount_amount`) AS `total_discount` FROM `orders` WHERE `orders`.`promo_code` is not null GROUP BY `orders`.`promo_code` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `promo_usage`  AS SELECT `orders`.`promo_code` AS `promo_code`, count(`orders`.`order_id`) AS `usage_count`, sum(`orders`.`discount_amount`) AS `total_discount`, sum(`orders`.`final_amount`) AS `total_revenue` FROM `orders` WHERE `orders`.`promo_code` is not null GROUP BY `orders`.`promo_code` ;
 
 --
 -- 转储表的索引
