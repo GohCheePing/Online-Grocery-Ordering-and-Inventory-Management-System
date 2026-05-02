@@ -10,11 +10,11 @@ if (!isset($_SESSION['admin_id'])) {
 $admin = $_SESSION['admin_full_name'] ?? "Admin";
 
 $product = $conn->query("SELECT COUNT(*) AS total FROM product")->fetch_assoc()['total'];
-$order   = $conn->query("SELECT COUNT(*) AS total FROM `order`")->fetch_assoc()['total'];
-$user    = $conn->query("SELECT COUNT(*) AS total FROM customer")->fetch_assoc()['total'];
-
-$row = $conn->query("SELECT SUM(total_amount) AS total FROM `order`")->fetch_assoc();
+$order = $conn->query("SELECT COUNT(*) AS total FROM `orders`")->fetch_assoc()['total'];
+$user = $conn->query("SELECT COUNT(*) AS total FROM customer")->fetch_assoc()['total'];
+$row = $conn->query("SELECT SUM(total_amount) AS total FROM `orders`")->fetch_assoc();
 $rev = $row['total'] ?? 0;
+$totalOrders = $order;
 ?>
 
 <!DOCTYPE html>

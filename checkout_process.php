@@ -12,11 +12,21 @@ if (empty($_SESSION['cart'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$total_amount = $_POST['total'];
+$total_amount = 0;
+
+foreach ($_SESSION['cart'] as $product_id => $qty) {
+
+    $stmt = $conn->prepare("SELECT price FROM product WHERE product_id=?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $price = $stmt->get_result()->fetch_assoc()['price'];
+
+    $total_amount += $price * $qty;
+}
 $conn->begin_transaction();
 
 try {
-    $stmt_order = $conn->prepare("INSERT INTO `order` (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')");
+    $stmt_order = $conn->prepare("INSERT INTO `orders` (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')");
     $stmt_order->bind_param("id", $user_id, $total_amount);
     $stmt_order->execute();
     

@@ -1,13 +1,17 @@
 <?php
 session_start();
 require 'db.php';
+
+$total = 0;
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Your Cart - FreshMart</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="cart-page">
 
 <div class="cart-header">
@@ -17,96 +21,154 @@ require 'db.php';
 
 <h2>🛒 Your Shopping Cart</h2>
 
-<?php
-$total = 0;
-if(!empty($_SESSION['cart'])):
-?>
+<?php if (!empty($_SESSION['cart'])): ?>
+
 <div class="cart-container">
     <div class="cart-items">
-        <?php foreach($_SESSION['cart'] as $id => $qty):
-            $stmt = $conn->prepare("SELECT * FROM product WHERE product_id = ?");
-            $stmt->bind_param("i", $id);
+
+        <?php foreach ($_SESSION['cart'] as $product_id => $qty): ?>
+
+            <?php
+            $stmt = $conn->prepare("SELECT * FROM product WHERE product_id=?");
+            $stmt->bind_param("i", $product_id);
             $stmt->execute();
             $p = $stmt->get_result()->fetch_assoc();
+
             $sub = $p['price'] * $qty;
             $total += $sub;
-        ?>
-        <div class="cart-row" data-id="<?php echo $id; ?>" data-price="<?php echo $p['price']; ?>">
-            <div class="cart-img">
-                <img src="images/<?php echo strtolower(str_replace(' ','_',$p['product_name'])); ?>.jpg" onerror="this.src='images/default.jpeg'">
+            ?>
+
+            <div class="cart-row"
+                 data-id="<?php echo $product_id; ?>"
+                 data-price="<?php echo $p['price']; ?>">
+
+                <div class="cart-img">
+                    <img src="images/<?php echo strtolower(str_replace(' ','_',$p['product_name'])); ?>.jpg"
+                         onerror="this.src='images/default.jpeg'">
+                </div>
+
+                <div class="cart-left">
+                    <div class="cart-name"><?php echo $p['product_name']; ?></div>
+                    <div class="cart-price">RM <?php echo number_format($p['price'],2); ?></div>
+                </div>
+
+                <div class="cart-middle">
+                    <button onclick="updateCart(<?php echo $product_id; ?>,'minus')">-</button>
+
+                    <input class="qty-input" type="number"
+                           value="<?php echo $qty; ?>"
+                           onchange="setQty(<?php echo $product_id; ?>, this.value)">
+
+                    <button onclick="updateCart(<?php echo $product_id; ?>,'plus')">+</button>
+                </div>
+
+                <div class="cart-right subtotal">
+                    RM <?php echo number_format($sub,2); ?>
+                </div>
+
+                <div class="cart-remove">
+                    <button onclick="updateCart(<?php echo $product_id; ?>,'remove')">Remove</button>
+                </div>
+
             </div>
-            <div class="cart-left">
-                <div class="cart-name"><?php echo $p['product_name']; ?></div>
-                <div class="cart-price">RM <?php echo number_format($p['price'],2); ?></div>
-            </div>
-            <div class="cart-middle">
-                <button class="qty-btn" onclick="updateCart(<?php echo $id; ?>,'minus')">-</button>
-                <input class="qty-input" type="number" min="1" value="<?php echo $qty; ?>" onchange="setQty(<?php echo $id; ?>, this.value)">
-                <button class="qty-btn plus" onclick="updateCart(<?php echo $id; ?>,'plus')">+</button>
-            </div>
-            <div class="cart-right">
-                <span class="subtotal">RM <?php echo number_format($sub,2); ?></span>
-            </div>
-            <div class="cart-remove">
-                <button class="remove-btn" onclick="updateCart(<?php echo $id; ?>,'remove')">Remove</button>
-            </div>
-        </div>
+
         <?php endforeach; ?>
+
     </div>
 
     <div class="cart-summary">
         <h3>Order Summary</h3>
-        <p>Total Items: <span id="items"><?php echo array_sum($_SESSION['cart']); ?></span></p>
+
+        <p>Total Items:
+            <span id="items"><?php echo array_sum($_SESSION['cart']); ?></span>
+        </p>
+
         <h2 id="total">RM <?php echo number_format($total,2); ?></h2>
+
         <form action="checkout_process.php" method="POST">
-            <input type="hidden" name="total" value="<?php echo $total; ?>">
             <button class="checkout-btn">Checkout</button>
         </form>
     </div>
+
 </div>
+
 <?php else: ?>
     <div class="cart-container">
-        <p>Your cart is empty 😢 <a href="homepage.php">Go shopping</a></p>
+        <p>Your cart is empty 😢 </p>
     </div>
 <?php endif; ?>
 
 <script>
 function setQty(id, value){
     value = parseInt(value);
-    if(value <= 0) { updateCart(id, 'remove'); return; }
-    fetch(`manage_cart.php?id=${id}&action=set&qty=${value}`)
+    if(value <= 0) {
+        updateCart(id, 'remove');
+        return;
+    }
+
+    fetch('manage_cart.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id, action:'set', qty:value})
+    })
     .then(res => res.json())
-    .then(data => { if(data.status === "success") updateUI(data.cart); });
+    .then(data => {
+        if(data.status === "success") updateUI(data.cart);
+    });
 }
 
 function updateCart(id, action){
-    fetch(`manage_cart.php?id=${id}&action=${action}`)
+    fetch('manage_cart.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id, action})
+    })
     .then(res => res.json())
-    .then(data => { if(data.status === "success") updateUI(data.cart); });
+    .then(data => {
+        if(data.status === "success") updateUI(data.cart);
+        else alert(data.msg || "Error");
+    });
 }
 
 function updateUI(cart){
     let total = 0, totalItems = 0;
-    const rows = document.querySelectorAll('.cart-row');
-    
-    rows.forEach(row => {
+
+    document.querySelectorAll('.cart-row').forEach(row => {
+
         let id = row.dataset.id;
-        if(!cart[id]){ row.remove(); return; }
-        
+
+        if(!cart[id]){
+            row.remove();
+            return;
+        }
+
         let qty = cart[id];
         let price = parseFloat(row.dataset.price);
+
         row.querySelector('.qty-input').value = qty;
-        let sub = qty * price;
-        row.querySelector('.subtotal').innerText = "RM " + sub.toFixed(2);
-        total += sub;
+
+        // ✅ FIXED (subtotal class must exist)
+        row.querySelector('.subtotal').innerText =
+            "RM " + (qty * price).toFixed(2);
+
+        total += qty * price;
         totalItems += qty;
     });
 
     document.getElementById("total").innerText = "RM " + total.toFixed(2);
     document.getElementById("items").innerText = totalItems;
 
+    // 🔥 sync homepage cart badge
+    const badge = document.getElementById("count");
+    if(badge){
+        let sum = 0;
+        for(let k in cart) sum += cart[k];
+        badge.innerText = sum;
+    }
+
     if(Object.keys(cart).length === 0){
-        document.querySelector('.cart-container').innerHTML = "<p>Your cart is empty 😢 <a href='homepage.php'>Go shopping</a></p>";
+        document.querySelector('.cart-container').innerHTML =
+        "<p>Your cart is empty 😢 <a href='homepage.php'>Go shopping</a></p>";
     }
 }
 </script>

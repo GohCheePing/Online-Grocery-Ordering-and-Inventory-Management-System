@@ -92,16 +92,23 @@ while($row = $products_res->fetch_assoc()) {
         }
 
         function addToCart(id) {
-            fetch('manage_cart.php?id=' + id + '&action=add')
+            fetch('manage_cart.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id, action:'plus'})
+            })
             .then(res => res.json())
             .then(data => {
+
                 if(data.status === "success"){
                     let total = 0;
                     for(let k in data.cart) total += data.cart[k];
+
                     document.getElementById("count").innerText = total;
                     showToast("Added to cart");
-                } else {
-                    showToast("Out of stock");
+                }
+                else {
+                    showToast(data.msg || "Out of stock");
                 }
             });
         }
