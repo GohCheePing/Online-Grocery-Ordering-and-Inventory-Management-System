@@ -24,7 +24,10 @@ if(!empty($_SESSION['cart'])):
 <div class="cart-container">
     <div class="cart-items">
         <?php foreach($_SESSION['cart'] as $id => $qty):
-            $p = $conn->query("SELECT * FROM product WHERE product_id = $id")->fetch_assoc();
+            $stmt = $conn->prepare("SELECT * FROM product WHERE product_id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $p = $stmt->get_result()->fetch_assoc();
             $sub = $p['price'] * $qty;
             $total += $sub;
         ?>

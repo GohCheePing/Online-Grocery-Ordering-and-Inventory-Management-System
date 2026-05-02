@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stock = $_POST['stock_quantity'];
     $min = $_POST['min_stock_level'];
     $category = $_POST['category_id'];
-    $image = trim($_POST['image']);
+    $image = !empty($_POST['image']) ? trim($_POST['image']) : NULL;
 
     $stmt = $conn->prepare("
         INSERT INTO product

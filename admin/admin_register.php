@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $hash = password_hash($password, PASSWORD_DEFAULT);
 
             $stmt = $conn->prepare("
-                INSERT INTO admin (username, full_name, email, password)
+                INSERT INTO admin (username, full_name, email, admin_password)
                 VALUES (?, ?, ?, ?)
             ");
 

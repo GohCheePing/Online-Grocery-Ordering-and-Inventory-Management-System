@@ -7,9 +7,9 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-if (isset($_GET['delete'])) {
+if (isset($_POST['delete_id'])) {
 
-    $id = $_GET['delete'];
+    $id = (int)$_POST['delete_id'];
 
     $stmt = $conn->prepare("
         DELETE FROM product
@@ -435,13 +435,10 @@ td{
                 Edit
             </a>
 
-            <a
-                class="delete"
-                href="manage_products.php?delete=<?php echo $row['product_id']; ?>"
-                onclick="return confirm('Delete this product?');"
-            >
-                Delete
-            </a>
+            <form method="POST" onsubmit="return confirm('Delete this product?');">
+                <input type="hidden" name="delete_id" value="<?php echo $row['product_id']; ?>">
+                <button class="delete">Delete</button>
+            </form>
 
         </div>
 

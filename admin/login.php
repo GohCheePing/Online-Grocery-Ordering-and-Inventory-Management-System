@@ -28,9 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->close();
 
-    if ($user && password_verify($pass, $user['password'])) {
+    if ($user && password_verify($pass, $user['admin_password'])) {
 
-        $_SESSION['admin_id'] = $user['admin_id'];
+        $_SESSION['admin_id'] = $user['id'];
         $_SESSION['admin_email'] = $user['email'];
         $_SESSION['admin_full_name'] = $user['full_name'];
 
