@@ -2,69 +2,67 @@
 session_start();
 require 'db.php';
 
-if (!isset($_SESSION['user_id'])) {
-    echo "<script>alert('Please login first!'); location.href='login.php';</script>";
-    exit();
-}
-if (empty($_SESSION['cart'])) {
-    echo "<script>alert('Your cart is empty!'); location.href='homepage.php';</script>";
-    exit();
-}
+if (!isset($_SESSION['user_id'])) die("Login required");
+if (empty($_SESSION['cart'])) die("Cart empty");
 
 $user_id = $_SESSION['user_id'];
-$total_amount = 0;
 
-foreach ($_SESSION['cart'] as $product_id => $qty) {
+$total = 0;
+
+/* promo from cart */
+$promo = $_POST['promo_code'] ?? null;
+$discount = floatval($_POST['discount_amount'] ?? 0);
+
+/* calculate */
+foreach ($_SESSION['cart'] as $pid => $qty){
 
     $stmt = $conn->prepare("SELECT price FROM product WHERE product_id=?");
-    $stmt->bind_param("i", $product_id);
+    $stmt->bind_param("i",$pid);
     $stmt->execute();
     $price = $stmt->get_result()->fetch_assoc()['price'];
 
-    $total_amount += $price * $qty;
+    $total += $price * $qty;
 }
+
+$final = $total - $discount;
+if($final < 0) $final = 0;
+
 $conn->begin_transaction();
 
-try {
-    $stmt_order = $conn->prepare("INSERT INTO `orders` (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')");
-    $stmt_order->bind_param("id", $user_id, $total_amount);
-    $stmt_order->execute();
-    
+try{
+
+    $stmt = $conn->prepare("INSERT INTO orders(customer_id,total_amount,order_status) VALUES(?,?, 'Pending')");
+    $stmt->bind_param("id",$user_id,$final);
+    $stmt->execute();
+
     $order_id = $conn->insert_id;
-    foreach ($_SESSION['cart'] as $product_id => $quantity) {
-        
-        $stmt_p = $conn->prepare("SELECT price, stock_quantity FROM product WHERE product_id = ?");
-        $stmt_p->bind_param("i", $product_id);
-        $stmt_p->execute();
-        $product_data = $stmt_p->get_result()->fetch_assoc();
-        $unit_price = $product_data['price'];
-        $current_stock = $product_data['stock_quantity'];
 
-        if ($current_stock < $quantity) {
-            throw new Exception("Product ID $product_id is out of stock!");
+    foreach($_SESSION['cart'] as $pid=>$qty){
+
+        $stmt = $conn->prepare("SELECT price,stock_quantity FROM product WHERE product_id=?");
+        $stmt->bind_param("i",$pid);
+        $stmt->execute();
+        $p = $stmt->get_result()->fetch_assoc();
+
+        if($p['stock_quantity'] < $qty){
+            throw new Exception("Stock not enough");
         }
-        $stmt_item = $conn->prepare("INSERT INTO order_item (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
-        $stmt_item->bind_param("iiid", $order_id, $product_id, $quantity, $unit_price);
-        $stmt_item->execute();
 
-        $stmt_update = $conn->prepare(
-            "UPDATE product 
-            SET stock_quantity = stock_quantity - ? 
-            WHERE product_id = ? AND stock_quantity >= ?"
-        );
-        $stmt_update->bind_param("iii", $quantity, $product_id, $quantity);
-        $stmt_update->execute();
+        $stmt = $conn->prepare("INSERT INTO order_item(order_id,product_id,quantity,price) VALUES(?,?,?,?)");
+        $stmt->bind_param("iiid",$order_id,$pid,$qty,$p['price']);
+        $stmt->execute();
 
-        if ($stmt_update->affected_rows === 0) {
-            throw new Exception("Product ID $product_id is out of stock!");
-        }
+        $stmt = $conn->prepare("UPDATE product SET stock_quantity=stock_quantity-? WHERE product_id=?");
+        $stmt->bind_param("ii",$qty,$pid);
+        $stmt->execute();
     }
+
     $conn->commit();
     unset($_SESSION['cart']);
-    echo "<script>alert('Order placed successfully!'); location.href='orders.php';</script>";
-} catch (Exception $e) {
+
+    echo "Order success. Paid RM ".number_format($final,2);
+
+}catch(Exception $e){
     $conn->rollback();
-    echo "<script>alert('Checkout failed: " . $e->getMessage() . "'); location.href='cart.php';</script>";
+    echo "Error: ".$e->getMessage();
 }
-$conn->close();
-?>

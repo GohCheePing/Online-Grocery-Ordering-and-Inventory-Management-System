@@ -24,6 +24,7 @@ $total = 0;
 <?php if (!empty($_SESSION['cart'])): ?>
 
 <div class="cart-container">
+
     <div class="cart-items">
 
         <?php foreach ($_SESSION['cart'] as $product_id => $qty): ?>
@@ -76,29 +77,62 @@ $total = 0;
 
     </div>
 
+    <!-- SUMMARY -->
     <div class="cart-summary">
+
         <h3>Order Summary</h3>
 
         <p>Total Items:
             <span id="items"><?php echo array_sum($_SESSION['cart']); ?></span>
         </p>
 
+        <h4>Subtotal: RM <span id="subtotal"><?php echo number_format($total,2); ?></span></h4>
+
+        <h3>Discount: -RM <span id="discount">0.00</span></h3>
+
         <h2 id="total">RM <?php echo number_format($total,2); ?></h2>
 
-        <form action="checkout_process.php" method="POST">
-            <button class="checkout-btn">Checkout</button>
+        <!-- PROMO -->
+        <div class="promo-box">
+            <div class="promo-title">🎁 Promo Code</div>
+
+            <div class="promo-input-row">
+                <input type="text" id="promo_code" placeholder="SAVE10">
+                <button type="button" onclick="applyPromo()">Apply</button>
+            </div>
+
+            <div id="promo_msg" class="promo-msg"></div>
+        </div>
+
+        <!-- CHECKOUT -->
+        <form action="checkout_process.php" method="POST" onsubmit="return attachPromo()">
+
+            <input type="hidden" name="promo_code" id="promo_hidden">
+            <input type="hidden" name="discount_amount" id="discount_hidden">
+
+            <button class="checkout-btn">
+                Checkout
+            </button>
+
         </form>
+
     </div>
 
 </div>
 
 <?php else: ?>
     <div class="cart-container">
-        <p>Your cart is empty 😢 </p>
+        <p>Your cart is empty 😢</p>
     </div>
 <?php endif; ?>
 
 <script>
+let currentPromo = null;
+let discountAmount = 0;
+let subtotal = <?php echo $total; ?>;
+
+/* ================= CART ================= */
+
 function updateCart(id, action){
     fetch('manage_cart.php', {
         method: 'POST',
@@ -108,9 +142,7 @@ function updateCart(id, action){
     .then(res => res.json())
     .then(data => {
         if(data.status === "success"){
-            updateUI(data.cart, data.totalItems);
-        } else {
-            showToast(data.msg || "Error");
+            location.reload(); // keep simple + stable
         }
     });
 }
@@ -118,53 +150,80 @@ function updateCart(id, action){
 function setQty(id, value){
     value = parseInt(value);
     if(value <= 0){
-        updateCart(id, 'remove');
+        updateCart(id,'remove');
         return;
     }
 
     fetch('manage_cart.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ id, action: 'set', qty: value })
+        body: JSON.stringify({ id, action:'set', qty:value })
     })
     .then(res => res.json())
     .then(data => {
         if(data.status === "success"){
-            updateUI(data.cart, data.totalItems);
-        } else {
-            showToast(data.msg || "Stock limit reached");
+            location.reload();
         }
     });
 }
 
-function updateUI(cart, totalItems){
-    let total = 0;
+/* ================= PROMO (SHOPEE STYLE) ================= */
 
-    document.querySelectorAll('.cart-row').forEach(row => {
-        let id = row.dataset.id;
+function applyPromo(){
 
-        if(!cart[id]){
-            row.remove();
-            return;
+    const code = document.getElementById("promo_code").value.trim();
+
+    fetch("promo_check.php", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({code, subtotal})
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.status === "success"){
+
+            currentPromo = data.code;
+            discountAmount = data.discount;
+
+            document.getElementById("promo_msg").innerHTML =
+                "✔ Saved RM " + discountAmount.toFixed(2);
+
+            document.getElementById("promo_msg").style.color = "green";
+
+            updateFinal();
+
+        } else {
+
+            currentPromo = null;
+            discountAmount = 0;
+
+            document.getElementById("promo_msg").innerHTML =
+                "✖ " + data.msg;
+
+            document.getElementById("promo_msg").style.color = "red";
+
+            updateFinal();
         }
-
-        let qty = cart[id];
-        let price = parseFloat(row.dataset.price);
-
-        row.querySelector('.qty-input').value = qty;
-        row.querySelector('.subtotal').innerText = "RM " + (qty * price).toFixed(2);
-
-        total += qty * price;
     });
+}
 
-    document.getElementById("total").innerText = "RM " + total.toFixed(2);
-    document.getElementById("items").innerText = totalItems;
+function updateFinal(){
 
-    if(Object.keys(cart).length === 0){
-        document.querySelector('.cart-container').innerHTML =
-        "<p>Your cart is empty 😢</p>";
-    }
+    let final = subtotal - discountAmount;
+    if(final < 0) final = 0;
+
+    document.getElementById("discount").innerText = discountAmount.toFixed(2);
+    document.getElementById("total").innerText = "RM " + final.toFixed(2);
+}
+
+/* pass to checkout */
+function attachPromo(){
+    document.getElementById("promo_hidden").value = currentPromo || "";
+    document.getElementById("discount_hidden").value = discountAmount || 0;
+    return true;
 }
 </script>
+
 </body>
 </html>

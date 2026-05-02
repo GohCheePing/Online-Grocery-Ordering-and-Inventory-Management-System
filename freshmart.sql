@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 12:33:54
+-- 生成日期： 2026-05-02 13:14:54
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -34,13 +34,6 @@ CREATE TABLE `admin` (
   `full_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 转存表中的数据 `admin`
---
-
-INSERT INTO `admin` (`id`, `username`, `admin_password`, `full_name`, `email`) VALUES
-(3, '12345678_1', '$2y$10$af492lSTgwlC/HgS5IPXTeHDTXxkdGW2nhGKX2UZ49pXkwhT5F5rW', 'GOH CHEE PING', '12345678@1');
 
 -- --------------------------------------------------------
 
@@ -75,17 +68,8 @@ CREATE TABLE `customer` (
   `password` varchar(255) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `otp_code` varchar(10) DEFAULT NULL,
-  `otp_expiry` datetime DEFAULT NULL,
   `is_verified` tinyint(4) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 转存表中的数据 `customer`
---
-
-INSERT INTO `customer` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `otp_code`, `otp_expiry`, `is_verified`) VALUES
-(1, 'GOH CHEE PING', 'cheeping1212@gmail.com', '$2y$10$N3ybpgbJzOtZu/ET2hwZkuBq/pwA93Dk41FCpBTUxfxIkeQq1vpAa', NULL, NULL, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -98,6 +82,11 @@ CREATE TABLE `discount` (
   `code` varchar(50) DEFAULT NULL,
   `type` enum('percent','fixed') DEFAULT NULL,
   `value` decimal(10,2) DEFAULT NULL,
+  `min_spend` decimal(10,2) DEFAULT 0.00,
+  `usage_limit` int(11) DEFAULT NULL,
+  `used_count` int(11) DEFAULT 0,
+  `start_date` datetime DEFAULT current_timestamp(),
+  `end_date` datetime DEFAULT NULL,
   `active` tinyint(4) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -105,9 +94,21 @@ CREATE TABLE `discount` (
 -- 转存表中的数据 `discount`
 --
 
-INSERT INTO `discount` (`discount_id`, `code`, `type`, `value`, `active`) VALUES
-(1, 'SAVE10', 'percent', 10.00, 1),
-(2, 'RM5OFF', 'fixed', 5.00, 1);
+INSERT INTO `discount` (`discount_id`, `code`, `type`, `value`, `min_spend`, `usage_limit`, `used_count`, `start_date`, `end_date`, `active`) VALUES
+(1, 'SAVE10', 'percent', 10.00, 0.00, NULL, 0, '2026-05-02 19:12:59', NULL, 1),
+(2, 'RM5OFF', 'fixed', 5.00, 0.00, NULL, 0, '2026-05-02 19:12:59', NULL, 1);
+
+-- --------------------------------------------------------
+
+--
+-- 替换视图以便查看 `monthly_sales`
+-- （参见下面的实际视图）
+--
+CREATE TABLE `monthly_sales` (
+`month` varchar(7)
+,`total_orders` bigint(21)
+,`revenue` decimal(32,2)
+);
 
 -- --------------------------------------------------------
 
@@ -120,16 +121,11 @@ CREATE TABLE `orders` (
   `customer_id` int(11) DEFAULT NULL,
   `order_date` datetime DEFAULT current_timestamp(),
   `total_amount` decimal(10,2) DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `final_amount` decimal(10,2) DEFAULT NULL,
+  `promo_code` varchar(50) DEFAULT NULL,
   `order_status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- 转存表中的数据 `orders`
---
-
-INSERT INTO `orders` (`order_id`, `customer_id`, `order_date`, `total_amount`, `order_status`) VALUES
-(1, 1, '2026-05-02 18:16:49', 17.50, 'Pending'),
-(2, 1, '2026-05-02 18:21:50', 49.60, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -145,19 +141,18 @@ CREATE TABLE `order_item` (
   `price` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- 转存表中的数据 `order_item`
+-- 表的结构 `order_status_log`
 --
 
-INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
-(1, 1, 4, 8, 1.50),
-(2, 1, 2, 1, 2.00),
-(3, 1, 1, 1, 3.50),
-(4, 2, 1, 1, 3.50),
-(5, 2, 2, 5, 2.00),
-(6, 2, 4, 3, 1.50),
-(7, 2, 3, 3, 2.20),
-(8, 2, 6, 2, 12.50);
+CREATE TABLE `order_status_log` (
+  `log_id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `changed_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -171,21 +166,50 @@ CREATE TABLE `product` (
   `price` decimal(10,2) DEFAULT NULL,
   `stock_quantity` int(11) DEFAULT NULL,
   `min_stock_level` int(11) DEFAULT 5,
-  `category_id` int(11) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL
+  `category_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- 转存表中的数据 `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`, `image`) VALUES
-(1, 'Apple', 3.50, 48, 10, 1, ''),
-(2, 'Banana', 2.00, 34, 10, 1, NULL),
-(3, 'Tomato', 2.20, 27, 5, 2, NULL),
-(4, 'Carrot', 1.50, 49, 5, 2, NULL),
-(5, 'Milk', 8.80, 20, 5, 3, NULL),
-(6, 'Cheese', 12.50, 13, 5, 3, NULL);
+INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`) VALUES
+(1, 'Apple', 3.50, 50, 5, 1),
+(2, 'Banana', 2.00, 40, 5, 1),
+(3, 'Tomato', 2.20, 30, 5, 2),
+(4, 'Carrot', 1.50, 60, 5, 2),
+(5, 'Milk', 8.80, 20, 5, 3),
+(6, 'Cheese', 12.50, 15, 5, 3);
+
+-- --------------------------------------------------------
+
+--
+-- 替换视图以便查看 `promo_usage`
+-- （参见下面的实际视图）
+--
+CREATE TABLE `promo_usage` (
+`promo_code` varchar(50)
+,`usage_count` bigint(21)
+,`total_discount` decimal(32,2)
+);
+
+-- --------------------------------------------------------
+
+--
+-- 视图结构 `monthly_sales`
+--
+DROP TABLE IF EXISTS `monthly_sales`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `monthly_sales`  AS SELECT date_format(`orders`.`order_date`,'%Y-%m') AS `month`, count(`orders`.`order_id`) AS `total_orders`, sum(`orders`.`final_amount`) AS `revenue` FROM `orders` GROUP BY date_format(`orders`.`order_date`,'%Y-%m') ;
+
+-- --------------------------------------------------------
+
+--
+-- 视图结构 `promo_usage`
+--
+DROP TABLE IF EXISTS `promo_usage`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `promo_usage`  AS SELECT `orders`.`promo_code` AS `promo_code`, count(`orders`.`order_id`) AS `usage_count`, sum(`orders`.`discount_amount`) AS `total_discount` FROM `orders` WHERE `orders`.`promo_code` is not null GROUP BY `orders`.`promo_code` ;
 
 --
 -- 转储表的索引
@@ -234,6 +258,12 @@ ALTER TABLE `order_item`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- 表的索引 `order_status_log`
+--
+ALTER TABLE `order_status_log`
+  ADD PRIMARY KEY (`log_id`);
+
+--
 -- 表的索引 `product`
 --
 ALTER TABLE `product`
@@ -248,7 +278,7 @@ ALTER TABLE `product`
 -- 使用表AUTO_INCREMENT `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- 使用表AUTO_INCREMENT `category`
@@ -260,7 +290,7 @@ ALTER TABLE `category`
 -- 使用表AUTO_INCREMENT `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- 使用表AUTO_INCREMENT `discount`
@@ -272,13 +302,19 @@ ALTER TABLE `discount`
 -- 使用表AUTO_INCREMENT `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- 使用表AUTO_INCREMENT `order_item`
 --
 ALTER TABLE `order_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- 使用表AUTO_INCREMENT `order_status_log`
+--
+ALTER TABLE `order_status_log`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- 使用表AUTO_INCREMENT `product`
@@ -294,20 +330,20 @@ ALTER TABLE `product`
 -- 限制表 `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
 
 --
 -- 限制表 `order_item`
 --
 ALTER TABLE `order_item`
   ADD CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
 
 --
 -- 限制表 `product`
 --
 ALTER TABLE `product`
-  ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
