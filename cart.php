@@ -99,9 +99,25 @@ $total = 0;
 <?php endif; ?>
 
 <script>
+function updateCart(id, action){
+    fetch('manage_cart.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, action })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success"){
+            updateUI(data.cart, data.totalItems);
+        } else {
+            showToast(data.msg || "Error");
+        }
+    });
+}
+
 function setQty(id, value){
     value = parseInt(value);
-    if(value <= 0) {
+    if(value <= 0){
         updateCart(id, 'remove');
         return;
     }
@@ -109,32 +125,22 @@ function setQty(id, value){
     fetch('manage_cart.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({id, action:'set', qty:value})
+        body: JSON.stringify({ id, action: 'set', qty: value })
     })
     .then(res => res.json())
     .then(data => {
-        if(data.status === "success") updateUI(data.cart);
+        if(data.status === "success"){
+            updateUI(data.cart, data.totalItems);
+        } else {
+            showToast(data.msg || "Stock limit reached");
+        }
     });
 }
 
-function updateCart(id, action){
-    fetch('manage_cart.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({id, action})
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === "success") updateUI(data.cart);
-        else alert(data.msg || "Error");
-    });
-}
-
-function updateUI(cart){
-    let total = 0, totalItems = 0;
+function updateUI(cart, totalItems){
+    let total = 0;
 
     document.querySelectorAll('.cart-row').forEach(row => {
-
         let id = row.dataset.id;
 
         if(!cart[id]){
@@ -146,29 +152,17 @@ function updateUI(cart){
         let price = parseFloat(row.dataset.price);
 
         row.querySelector('.qty-input').value = qty;
-
-        // ✅ FIXED (subtotal class must exist)
-        row.querySelector('.subtotal').innerText =
-            "RM " + (qty * price).toFixed(2);
+        row.querySelector('.subtotal').innerText = "RM " + (qty * price).toFixed(2);
 
         total += qty * price;
-        totalItems += qty;
     });
 
     document.getElementById("total").innerText = "RM " + total.toFixed(2);
     document.getElementById("items").innerText = totalItems;
 
-    // 🔥 sync homepage cart badge
-    const badge = document.getElementById("count");
-    if(badge){
-        let sum = 0;
-        for(let k in cart) sum += cart[k];
-        badge.innerText = sum;
-    }
-
     if(Object.keys(cart).length === 0){
         document.querySelector('.cart-container').innerHTML =
-        "<p>Your cart is empty 😢 <a href='homepage.php'>Go shopping</a></p>";
+        "<p>Your cart is empty 😢</p>";
     }
 }
 </script>

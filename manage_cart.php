@@ -11,8 +11,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$id = (int)($data['id'] ?? 0);
-$action = $data['action'] ?? '';
+$id = (int)($data['id'] ?? ($_GET['id'] ?? 0));
+$action = $data['action'] ?? ($_GET['action'] ?? '');
+$qty = (int)($data['qty'] ?? ($_GET['qty'] ?? 0));
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
@@ -25,51 +26,63 @@ function getStock($conn, $id) {
     return $stmt->get_result()->fetch_assoc()['stock_quantity'] ?? 0;
 }
 
-$stock = getStock($conn, $id);
-$current = $_SESSION['cart'][$id] ?? 0;
-
-/* PLUS */
-if ($action === "plus") {
-
-    if ($current < $stock) {
-        $_SESSION['cart'][$id] = $current + 1;
-    } else {
-        echo json_encode(["status" => "error", "msg" => "out of stock"]);
-        exit();
-    }
+function getCartQty($cart, $id) {
+    return $cart[$id] ?? 0;
 }
 
-/* MINUS */
-elseif ($action === "minus") {
+$stock = getStock($conn, $id);
+$current = getCartQty($_SESSION['cart'], $id);
 
-    if (isset($_SESSION['cart'][$id])) {
-        $_SESSION['cart'][$id]--;
+if ($stock <= 0 && $action !== "remove") {
+    echo json_encode(["status" => "error", "msg" => "out of stock", "cart" => $_SESSION['cart']]);
+    exit();
+}
 
-        if ($_SESSION['cart'][$id] <= 0) {
+/* ========================
+   CORE LOGIC (SAFE VERSION)
+======================== */
+
+switch ($action) {
+
+    case "add":
+    case "plus":
+        if ($current < $stock) {
+            $_SESSION['cart'][$id] = $current + 1;
+        }
+        break;
+
+    case "minus":
+        if ($current > 1) {
+            $_SESSION['cart'][$id]--;
+        } else {
             unset($_SESSION['cart'][$id]);
         }
-    }
-}
+        break;
 
-/* REMOVE */
-elseif ($action === "remove") {
-    unset($_SESSION['cart'][$id]);
-}
+    case "set":
+        if ($qty <= 0) {
+            unset($_SESSION['cart'][$id]);
+        } elseif ($qty <= $stock) {
+            $_SESSION['cart'][$id] = $qty;
+        } else {
+            $_SESSION['cart'][$id] = $stock;
+        }
+        break;
 
-/* SET */
-elseif ($action === "set") {
-
-    $qty = (int)($data['qty'] ?? 0);
-
-    if ($qty <= 0) {
+    case "remove":
         unset($_SESSION['cart'][$id]);
-    }
-    elseif ($qty <= $stock) {
-        $_SESSION['cart'][$id] = $qty;
-    }
+        break;
 }
+
+/* ========================
+   RESPONSE (REAL-TIME SAFE)
+======================== */
+
+$totalItems = array_sum($_SESSION['cart']);
 
 echo json_encode([
     "status" => "success",
-    "cart" => $_SESSION['cart']
+    "cart" => $_SESSION['cart'],
+    "totalItems" => $totalItems,
+    "stock" => $stock
 ]);
