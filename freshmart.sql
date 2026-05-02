@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 13:14:54
+-- 生成日期： 2026-05-02 13:18:36
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -68,7 +68,8 @@ CREATE TABLE `customer` (
   `password` varchar(255) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `is_verified` tinyint(4) DEFAULT 0
+  `is_verified` tinyint(4) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -95,8 +96,8 @@ CREATE TABLE `discount` (
 --
 
 INSERT INTO `discount` (`discount_id`, `code`, `type`, `value`, `min_spend`, `usage_limit`, `used_count`, `start_date`, `end_date`, `active`) VALUES
-(1, 'SAVE10', 'percent', 10.00, 0.00, NULL, 0, '2026-05-02 19:12:59', NULL, 1),
-(2, 'RM5OFF', 'fixed', 5.00, 0.00, NULL, 0, '2026-05-02 19:12:59', NULL, 1);
+(1, 'SAVE10', 'percent', 10.00, 0.00, NULL, 0, '2026-05-02 11:18:04', NULL, 1),
+(2, 'RM5OFF', 'fixed', 5.00, 0.00, NULL, 0, '2026-05-02 11:18:04', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -124,7 +125,9 @@ CREATE TABLE `orders` (
   `discount_amount` decimal(10,2) DEFAULT 0.00,
   `final_amount` decimal(10,2) DEFAULT NULL,
   `promo_code` varchar(50) DEFAULT NULL,
-  `order_status` varchar(50) DEFAULT 'Pending'
+  `discount_id` int(11) DEFAULT NULL,
+  `order_status` varchar(50) DEFAULT 'Pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -261,7 +264,8 @@ ALTER TABLE `order_item`
 -- 表的索引 `order_status_log`
 --
 ALTER TABLE `order_status_log`
-  ADD PRIMARY KEY (`log_id`);
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `order_id` (`order_id`);
 
 --
 -- 表的索引 `product`
@@ -338,6 +342,12 @@ ALTER TABLE `orders`
 ALTER TABLE `order_item`
   ADD CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
+
+--
+-- 限制表 `order_status_log`
+--
+ALTER TABLE `order_status_log`
+  ADD CONSTRAINT `order_status_log_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
 
 --
 -- 限制表 `product`
