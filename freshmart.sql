@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 10:23:41
+-- 生成日期： 2026-05-02 12:33:54
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `username`, `admin_password`, `full_name`, `email`) VALUES
-(2, '12345678_1', '$2y$10$Ydcsgyv/BEyxQOCAVjCeAu1vTf00OEaWrJQUJPN.YAwJQVBQAZzoG', 'GOH CHEE PING', '12345678@1');
+(3, '12345678_1', '$2y$10$af492lSTgwlC/HgS5IPXTeHDTXxkdGW2nhGKX2UZ49pXkwhT5F5rW', 'GOH CHEE PING', '12345678@1');
 
 -- --------------------------------------------------------
 
@@ -80,6 +80,35 @@ CREATE TABLE `customer` (
   `is_verified` tinyint(4) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- 转存表中的数据 `customer`
+--
+
+INSERT INTO `customer` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `otp_code`, `otp_expiry`, `is_verified`) VALUES
+(1, 'GOH CHEE PING', 'cheeping1212@gmail.com', '$2y$10$N3ybpgbJzOtZu/ET2hwZkuBq/pwA93Dk41FCpBTUxfxIkeQq1vpAa', NULL, NULL, NULL, NULL, 1);
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `discount`
+--
+
+CREATE TABLE `discount` (
+  `discount_id` int(11) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `type` enum('percent','fixed') DEFAULT NULL,
+  `value` decimal(10,2) DEFAULT NULL,
+  `active` tinyint(4) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `discount`
+--
+
+INSERT INTO `discount` (`discount_id`, `code`, `type`, `value`, `active`) VALUES
+(1, 'SAVE10', 'percent', 10.00, 1),
+(2, 'RM5OFF', 'fixed', 5.00, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -93,6 +122,14 @@ CREATE TABLE `orders` (
   `total_amount` decimal(10,2) DEFAULT NULL,
   `order_status` varchar(50) DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `customer_id`, `order_date`, `total_amount`, `order_status`) VALUES
+(1, 1, '2026-05-02 18:16:49', 17.50, 'Pending'),
+(2, 1, '2026-05-02 18:21:50', 49.60, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -108,6 +145,20 @@ CREATE TABLE `order_item` (
   `price` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- 转存表中的数据 `order_item`
+--
+
+INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
+(1, 1, 4, 8, 1.50),
+(2, 1, 2, 1, 2.00),
+(3, 1, 1, 1, 3.50),
+(4, 2, 1, 1, 3.50),
+(5, 2, 2, 5, 2.00),
+(6, 2, 4, 3, 1.50),
+(7, 2, 3, 3, 2.20),
+(8, 2, 6, 2, 12.50);
+
 -- --------------------------------------------------------
 
 --
@@ -120,20 +171,21 @@ CREATE TABLE `product` (
   `price` decimal(10,2) DEFAULT NULL,
   `stock_quantity` int(11) DEFAULT NULL,
   `min_stock_level` int(11) DEFAULT 5,
-  `category_id` int(11) DEFAULT NULL
+  `category_id` int(11) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- 转存表中的数据 `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`) VALUES
-(1, 'Apple', 3.50, 50, 10, 1),
-(2, 'Banana', 2.00, 40, 10, 1),
-(3, 'Tomato', 2.20, 30, 5, 2),
-(4, 'Carrot', 1.50, 60, 5, 2),
-(5, 'Milk', 8.80, 20, 5, 3),
-(6, 'Cheese', 12.50, 15, 5, 3);
+INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`, `image`) VALUES
+(1, 'Apple', 3.50, 48, 10, 1, ''),
+(2, 'Banana', 2.00, 34, 10, 1, NULL),
+(3, 'Tomato', 2.20, 27, 5, 2, NULL),
+(4, 'Carrot', 1.50, 49, 5, 2, NULL),
+(5, 'Milk', 8.80, 20, 5, 3, NULL),
+(6, 'Cheese', 12.50, 13, 5, 3, NULL);
 
 --
 -- 转储表的索引
@@ -158,6 +210,13 @@ ALTER TABLE `category`
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`customer_id`),
   ADD UNIQUE KEY `email` (`email`);
+
+--
+-- 表的索引 `discount`
+--
+ALTER TABLE `discount`
+  ADD PRIMARY KEY (`discount_id`),
+  ADD UNIQUE KEY `code` (`code`);
 
 --
 -- 表的索引 `orders`
@@ -189,7 +248,7 @@ ALTER TABLE `product`
 -- 使用表AUTO_INCREMENT `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- 使用表AUTO_INCREMENT `category`
@@ -201,19 +260,25 @@ ALTER TABLE `category`
 -- 使用表AUTO_INCREMENT `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- 使用表AUTO_INCREMENT `discount`
+--
+ALTER TABLE `discount`
+  MODIFY `discount_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- 使用表AUTO_INCREMENT `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- 使用表AUTO_INCREMENT `order_item`
 --
 ALTER TABLE `order_item`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- 使用表AUTO_INCREMENT `product`

@@ -42,6 +42,7 @@ while($row = $products_res->fetch_assoc()) {
         <a href="cart.php" class="cart" style="text-decoration:none;">
             🛒 My Cart ( <span id="count"><?php echo isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0; ?></span> )
         </a>
+        <a href="user_dashboard.php">My Dashboard</a>
     </div>
 
     <div class="categories">
