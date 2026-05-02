@@ -22,7 +22,6 @@ if(isset($_POST['send_otp'])){
         $error = "Password not match";
     } else {
 
-        // check email
         $check = $conn->prepare("SELECT * FROM customer WHERE email=?");
         $check->bind_param("s",$email);
         $check->execute();
@@ -34,7 +33,6 @@ if(isset($_POST['send_otp'])){
 
             $otp = rand(100000,999999);
 
-            // save session
             $_SESSION['register'] = [
                 'name'=>$name,
                 'email'=>$email,
@@ -43,7 +41,6 @@ if(isset($_POST['send_otp'])){
                 'expire'=>time()+300
             ];
 
-            // send email
             $mail = new PHPMailer(true);
 
             try {
@@ -78,31 +75,99 @@ if(isset($_POST['send_otp'])){
 <html>
 <head>
 <title>Register</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container mt-5">
-<div class="card p-4 shadow">
+<a href="homepage.php" class="home-btn">← Home</a>
 
-<h3>Register</h3>
+<div class="auth-card">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join Freshmart today</p>
 
-<?php if($error) echo "<div class='alert alert-danger'>$error</div>"; ?>
+    <?php if($error): ?>
+        <div class="error"><?php echo $error; ?></div>
+    <?php endif; ?>
 
-<form method="POST">
+    <form method="POST" onsubmit="return validateForm()">
 
-<input class="form-control mb-2" name="fullname" placeholder="Full Name">
-<input class="form-control mb-2" name="email" placeholder="Email">
-<input class="form-control mb-2" type="password" name="password" placeholder="Password">
-<input class="form-control mb-2" type="password" name="confirm_password" placeholder="Confirm Password">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" name="fullname" required>
+        </div>
 
-<button class="btn btn-success w-100" name="send_otp">Send OTP</button>
+        <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" name="email" required>
+        </div>
 
-</form>
+        <div class="input-group">
+            <label>Password</label>
+            <div class="password-wrap">
+                <input type="password" name="password" id="password" oninput="checkStrength()" required>
+                <button type="button" class="toggle-password" onclick="togglePassword('password')">👁</button>
+            </div>
+            <small id="strengthText"></small>
+        </div>
 
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <div class="password-wrap">
+                <input type="password" name="confirm_password" id="confirm_password" required>
+                <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">👁</button>
+            </div>
+        </div>
+
+        <button class="auth-btn" id="otpBtn" name="send_otp" disabled>Send OTP</button>
+
+    </form>
+
+    <p class="switch-text">
+        Already have an account? <a href="login.php">Login here</a>
+    </p>
 </div>
-</div>
+
+<script>
+function togglePassword(id){
+    const input = document.getElementById(id);
+    input.type = input.type === "password" ? "text" : "password";
+}
+
+// password strength check
+function checkStrength(){
+    const pw = document.getElementById("password").value;
+    const btn = document.getElementById("otpBtn");
+    const text = document.getElementById("strengthText");
+
+    let strong =
+        pw.length >= 8 &&
+        /[A-Za-z]/.test(pw) &&
+        /[0-9]/.test(pw);
+
+    if(pw.length === 0){
+        text.innerHTML = "";
+        btn.disabled = true;
+        return;
+    }
+
+    if(strong){
+        text.style.color = "green";
+        text.innerHTML = "Strong password ✔";
+        btn.disabled = false;
+    } else {
+        text.style.color = "red";
+        text.innerHTML = "Weak password (min 8 chars + letters + numbers)";
+        btn.disabled = true;
+    }
+}
+
+// final safety check
+function validateForm(){
+    const btn = document.getElementById("otpBtn");
+    return !btn.disabled;
+}
+</script>
 
 </body>
 </html>
