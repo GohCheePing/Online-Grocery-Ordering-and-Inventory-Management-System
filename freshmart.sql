@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 13:20:31
+-- 生成日期： 2026-05-02 13:24:05
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -96,8 +96,8 @@ CREATE TABLE `discount` (
 --
 
 INSERT INTO `discount` (`discount_id`, `code`, `type`, `value`, `min_spend`, `usage_limit`, `used_count`, `start_date`, `end_date`, `active`) VALUES
-(1, 'SAVE10', 'percent', 10.00, 0.00, NULL, 0, '2026-05-02 11:18:04', NULL, 1),
-(2, 'RM5OFF', 'fixed', 5.00, 0.00, NULL, 0, '2026-05-02 11:18:04', NULL, 1);
+(1, 'SAVE10', 'percent', 10.00, 0.00, NULL, 0, '2026-05-02 11:23:42', NULL, 1),
+(2, 'RM5OFF', 'fixed', 5.00, 0.00, NULL, 0, '2026-05-02 11:23:42', NULL, 1);
 
 -- --------------------------------------------------------
 
