@@ -68,25 +68,39 @@ while($row = $products_res->fetch_assoc()) {
         const allProducts = <?php echo json_encode($products); ?>;
 
         function renderProducts(list) {
-            const grid = document.getElementById("grid");
-            let html = "";
-            list.forEach(p => {
-                const isOut = parseInt(p.stock_quantity) <= 0;
-                let fileName = p.product_name.toLowerCase().replace(/\s+/g, '_');
-                html += `
-                    <div class="product-card" style="background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eee;">
-                        <img src="images/${fileName}.jpg" onerror="this.onerror=null; this.src='images/default.jpeg';" style="width: 100%; height: 160px; object-fit: contain; margin-bottom: 15px;">
-                        <h3 style="margin: 10px 0;">${p.product_name}</h3>
-                        <div style="color: var(--main-green); font-size: 20px; font-weight: 800; margin-bottom: 15px;">RM ${parseFloat(p.price).toFixed(2)}</div>
-                        <div style="font-size:12px; color:#888; margin-bottom:10px;">Stock: ${p.stock_quantity}</div>
-                        <button onclick="addToCart(${p.product_id})" ${isOut ? 'disabled' : ''} 
-                                style="background: var(--main-green); color: white; border: none; padding: 10px 0; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            ${isOut ? 'Out of Stock' : 'Add to Cart'}
-                        </button>
-                    </div>`;
-            });
-            grid.innerHTML = html || "<p>No products found.</p>";
-        }
+    const grid = document.getElementById("grid");
+    let html = "";
+
+    list.forEach(p => {
+        const isOut = parseInt(p.stock_quantity) <= 0;
+        let img = p.image ? p.image : 'default.jpeg';
+        html += `
+            <div class="product-card" style="background: white; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #eee;">
+                
+                <img src="images/${img}" 
+                     onerror="this.onerror=null; this.src='images/default.jpeg';"
+                     style="width: 100%; height: 160px; object-fit: contain; margin-bottom: 15px;">
+
+                <h3 style="margin: 10px 0;">${p.product_name}</h3>
+
+                <div style="color: var(--main-green); font-size: 20px; font-weight: 800; margin-bottom: 15px;">
+                    RM ${parseFloat(p.price).toFixed(2)}
+                </div>
+
+                <div style="font-size:12px; color:#888; margin-bottom:10px;">
+                    Stock: ${p.stock_quantity}
+                </div>
+
+                <button onclick="addToCart(${p.product_id})" ${isOut ? 'disabled' : ''} 
+                        style="background: var(--main-green); color: white; border: none; padding: 10px 0; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    ${isOut ? 'Out of Stock' : 'Add to Cart'}
+                </button>
+
+            </div>`;
+    });
+
+    grid.innerHTML = html || "<p>No products found.</p>";
+}
 
         function filter(id) {
             id === 'all' ? renderProducts(allProducts) : renderProducts(allProducts.filter(x => x.category_id == id));
