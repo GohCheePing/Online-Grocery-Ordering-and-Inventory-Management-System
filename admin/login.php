@@ -391,6 +391,48 @@ button span{
     font-weight:700;
 }
 
+/* PASSWORD BOX */
+
+.password-box{
+
+    position:relative;
+}
+
+.password-box input{
+
+    padding-right:60px;
+}
+
+.toggle-password{
+
+    position:absolute;
+
+    right:18px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    user-select:none;
+
+    color:rgba(0,0,0,0.55);
+
+    transition:0.2s;
+}
+
+.toggle-password:hover{
+
+    color:#007aff;
+
+    transform:
+        translateY(-50%)
+        scale(1.1);
+}
+
 </style>
 
 </head>
@@ -423,15 +465,27 @@ button span{
 
         <div class="input-group">
 
-            <label>Password</label>
+    <label>Password</label>
 
-            <input
-                type="password"
-                name="password"
-                required
-            >
+    <div class="password-box">
 
-        </div>
+        <input
+            type="password"
+            name="password"
+            id="password"
+            required
+        >
+
+        <span
+            class="toggle-password"
+            onclick="togglePassword()"
+        >
+            👁
+        </span>
+
+    </div>
+
+</div>
 
         <button type="submit">
             <span>Login</span>
@@ -465,6 +519,26 @@ btn.addEventListener("mousemove", function(e){
     btn.style.setProperty("--x", x + "px");
     btn.style.setProperty("--y", y + "px");
 });
+
+
+
+</script>
+
+<script>
+
+function togglePassword(){
+
+    const password = document.getElementById("password");
+
+    if(password.type === "password"){
+
+        password.type = "text";
+
+    } else {
+
+        password.type = "password";
+    }
+}
 
 </script>
 
