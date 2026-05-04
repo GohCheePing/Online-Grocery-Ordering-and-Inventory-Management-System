@@ -12,7 +12,7 @@ if (!isset($_GET['id'])) {
     exit();
 }
 
-$id = $_GET['id'];
+$id = (int)$_GET['id'];
 
 $stmt = $conn->prepare("
     SELECT * FROM product
@@ -39,8 +39,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stock = $_POST['stock_quantity'];
     $min = $_POST['min_stock_level'];
     $category = $_POST['category_id'];
-    $image = $_POST['image'];
 
+    $image = $product['image']; 
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $filename = $_FILES['image']['name'];
+        $tmp = $_FILES['image']['tmp_name'];
+        $newName = time() . "_" . $filename;
+        move_uploaded_file($tmp, "../images/" . $newName);
+        if (!empty($product['image']) && file_exists("../images/" . $product['image'])) {
+            unlink("../images/" . $product['image']);
+        }
+        $image = $newName;
+    }
     $update = $conn->prepare("
         UPDATE product
         SET
