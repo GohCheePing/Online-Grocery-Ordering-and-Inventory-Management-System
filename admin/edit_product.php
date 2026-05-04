@@ -330,7 +330,7 @@ button:hover,
 
 <?php endif; ?>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
 <label>Product Name</label>
 
@@ -393,14 +393,8 @@ button:hover,
 
 </select>
 
-<label>Image Filename</label>
-
-<input
-    type="text"
-    name="image"
-    value="<?php echo htmlspecialchars($product['image']); ?>"
-    placeholder="apple.jpg"
->
+<label>Image File</label>
+<input type="file" name="image">
 
 <button type="submit">
     Save Changes

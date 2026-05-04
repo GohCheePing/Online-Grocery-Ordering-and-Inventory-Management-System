@@ -19,7 +19,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stock = $_POST['stock_quantity'];
     $min = $_POST['min_stock_level'];
     $category = $_POST['category_id'];
-    $image = !empty($_POST['image']) ? trim($_POST['image']) : NULL;
+    $image = NULL;
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $filename = $_FILES['image']['name'];
+        $tmp = $_FILES['image']['tmp_name'];
+        $newName = time() . "_" . $filename;
+        move_uploaded_file($tmp, "../images/" . $newName);
+        $image = $newName;
+    }
 
     $stmt = $conn->prepare("
         INSERT INTO product
@@ -207,7 +215,7 @@ button:hover,
     <div class="error"><?php echo htmlspecialchars($error); ?></div>
 <?php endif; ?>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
 <label>Product Name</label>
 <input type="text" name="product_name" required>
@@ -230,8 +238,8 @@ button:hover,
     <?php endwhile; ?>
 </select>
 
-<label>Image Filename</label>
-<input type="text" name="image" placeholder="apple.jpg">
+<label>Image File</label>
+<input type="file" name="image" required>
 
 <button type="submit">
     Add Product

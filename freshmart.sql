@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1
--- 生成日期： 2026-05-02 13:24:05
+-- 生成日期： 2026-05-04 15:42:56
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -34,6 +34,13 @@ CREATE TABLE `admin` (
   `full_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `admin`
+--
+
+INSERT INTO `admin` (`id`, `username`, `admin_password`, `full_name`, `email`) VALUES
+(1, 'cheeping1212_gmail_com', '$2y$10$OEugeFu/yGhlzuTPXxVvnuQZ4A.MfQbpKCVjSNmG8tu80kQBehrei', 'GOH CHEE PING', 'cheeping1212@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -169,20 +176,23 @@ CREATE TABLE `product` (
   `price` decimal(10,2) DEFAULT NULL,
   `stock_quantity` int(11) DEFAULT NULL,
   `min_stock_level` int(11) DEFAULT 5,
-  `category_id` int(11) DEFAULT NULL
+  `category_id` int(11) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- 转存表中的数据 `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`) VALUES
-(1, 'Apple', 3.50, 50, 5, 1),
-(2, 'Banana', 2.00, 40, 5, 1),
-(3, 'Tomato', 2.20, 30, 5, 2),
-(4, 'Carrot', 1.50, 60, 5, 2),
-(5, 'Milk', 8.80, 20, 5, 3),
-(6, 'Cheese', 12.50, 15, 5, 3);
+INSERT INTO `product` (`product_id`, `product_name`, `price`, `stock_quantity`, `min_stock_level`, `category_id`, `image`, `description`, `created_at`) VALUES
+(1, 'Apple', 3.50, 50, 5, 1, NULL, NULL, '2026-05-04 13:21:44'),
+(2, 'Banana', 2.00, 40, 5, 1, NULL, NULL, '2026-05-04 13:21:44'),
+(3, 'Tomato', 2.20, 30, 5, 2, NULL, NULL, '2026-05-04 13:21:44'),
+(4, 'Carrot', 1.50, 60, 5, 2, NULL, NULL, '2026-05-04 13:21:44'),
+(5, 'Milk', 8.80, 20, 5, 3, NULL, NULL, '2026-05-04 13:21:44'),
+(6, 'Cheese', 12.50, 15, 5, 3, NULL, NULL, '2026-05-04 13:21:44');
 
 -- --------------------------------------------------------
 
@@ -283,7 +293,7 @@ ALTER TABLE `product`
 -- 使用表AUTO_INCREMENT `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- 使用表AUTO_INCREMENT `category`
@@ -325,7 +335,7 @@ ALTER TABLE `order_status_log`
 -- 使用表AUTO_INCREMENT `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- 限制导出的表
